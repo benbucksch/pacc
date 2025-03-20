@@ -72,13 +72,13 @@ For OAuth2, it uses Open ID Connect and Dynamic Client Registration.
 
 # Data format
 
-The configuration file has the following data format.
+The configuration file MUST have the following data format and qualities.
 
 The MIME type is `text/json`.
 
 ## JSON config file
 
-The following example shows the syntax of the JSON config file returned.
+The following example shows the syntax of the JSON config file.
 
     {
       servers: {
@@ -161,45 +161,46 @@ The following example shows the syntax of the JSON config file returned.
       version: "1.0"
     }
 
-## Servers
+## servers
 
 E.g.
 
     servers: {
       jmap: {
         url: "https://jmap.example.net/session",
-        authentication: [ ... }
+        authentication: [ ... ]
       },
       imap: { ... }
     }
 
-`server` is a top-level property containing an object map. The key is a
+`servers` is a top-level property containing an object map. The key is a
 `protocol` name, defined in section "Protocol". The value is an object
-which describes the server and is defined in section "Server object".
+which describes the server and is defined in this section.
 
 ### Protocol
 
-The `protocol` is the key of the pbject map inside the `servers` property.
+The `protocol` is the key of the object map inside the `servers` property.
 
 It specifies which wire protocol to use for this server.
 
-| Protocol      | URL scheme  | Port | Name         | Specification | Additional Properties
-| ------------- | ----------- | ---- | ------------ | ------------- | ---
-| `jmap`        | https       | 443  | JMAP         | RFC 8620, RFC 8621, RFC 8887, RFC 9610 et al |
-| `imap`        | imaps       | 993  | IMAP         | RFC 9051 or RFC 3501, et al |
-| `pop3`        | pop3s       | 995  | POP3         | RFC 1939, RFC 5034 |
-| `smtp`        | submissions | 465  | SMTP         | RFC 5321, RFC 2822 |
-| `caldav`      | https       | 443  | CalDAV       | RFC 4791 |
-| `carddav`     | https       | 443  | CardDav      | RFC 6352 |
-| `webdav`      | https       | 443  | WebDAV       | RFC 4918 |
-| `managesieve` | sieves      | 443  | ManageSieve  | RFC 5804, RFC 5228 |
-| `ews`         | https       | 443  | Exchange Web Services | |
-| `activeSync`  | https       | 443  | ActiveSync            | |
-| `graph`       | https       | 443  | Microsoft Graph       | |
+| Protocol      | URL scheme  | Port | Name         | Specification
+| ------------- | ----------- | ---- | ------------ | -------------
+| `jmap`        | https       | 443  | JMAP         | RFC 8620, RFC 8621, RFC 8887, RFC 9610 et al
+| `imap`        | imaps       | 993  | IMAP         | RFC 9051 or RFC 3501, et al
+| `pop3`        | pop3s       | 995  | POP3         | RFC 1939, RFC 5034
+| `smtp`        | submissions | 465  | SMTP         | RFC 5321, RFC 2822
+| `caldav`      | https       | 443  | CalDAV       | RFC 4791
+| `carddav`     | https       | 443  | CardDav      | RFC 6352
+| `webdav`      | https       | 443  | WebDAV       | RFC 4918
+| `managesieve` | sieves      | 443  | ManageSieve  | RFC 5804, RFC 5228
+| `ews`         | https       | 443  | Exchange Web Services |
+| `activeSync`  | https       | 443  | ActiveSync            |
+| `graph`       | https       | 443  | Microsoft Graph       |
 
 
 Other protocol names can be added using an IANA registry. Their
 respective registrations need to define:
+
 * Protocol: The `protocol` name, as appearing in the JSON
 * URL scheme: Which URL scheme or schemes are to used in the URL
 * Port: The default port number, if none is given in the URL
@@ -211,8 +212,9 @@ respective registrations need to define:
 ### URL
 
 E.g.
-        url: "https://jmap.example.net/session",
-        url: "imaps://imap.example.net:1993",
+
+        url: "https://jmap.example.net/session"
+        url: "imaps://imap.example.net:1993"
 
 The `url` property specifies the where and how to contact the server.
 
@@ -239,18 +241,20 @@ If the URL contains an explicit port, that part MUST be used by the client.
 
 For some protocols like IMAP, POP3 and SMTP, the path is empty.
 
-### Authentication
+### authentication
 
-E.g. `authentication: [ "http-basic" ]` for HTTPS or
-`authentication: [ "sasl-SCRAM-SHA-256-1" ]` for TCP.
+E.g.
+
+    authentication: [ "http-basic" ]
+    authentication: [ "sasl-SCRAM-SHA-256-1" ]
 
 The `authentication` property is an array that defines which authentication
-methods are available to use.
+methods are available to use. Each of them MUST work.
 
 #### Authentication methods
 
 * For HTTPS or WebSocket-based protocols, these can be authentication methods
-  used in `WWW-authenticate` the HTTP header. The value is `http-" plus the
+  used in `WWW-authenticate` the HTTP header. The value is `http-` plus the
   HTTP authentication scheme name, case-insensitive. See RFC 7617 and 7616.
   E.g. `http-basic` for `WWW-Authenticate: Basic`, or `http-NTLM`.
 * For TCP-based protocols, these can be SASL schemes. The value is `sasl-`
@@ -259,13 +263,16 @@ methods are available to use.
 * For OAuth2, the value is `OAuth2`.
   * With TCP, SASL `OAUTHBEARER` (current) or `XOAUTH2` (deprecated) or
     successors may be used.
-  * With HTTP, `Bearer` or a successor is used. See RFC 6750 Section 3.
-  * The provider MUST adhere to the requirements defined in section OAuth2
-    in this specification.
+  * With HTTP, `WWW-Authenticate: Bearer` or a successor is used.
+    See RFC 6750 Section 3.
+  * The provider MUST adhere to the requirements defined in section
+    "OAuth2 requirements" in this specification.
 
 #### Multiple authentication alternatives
 
 The `authentication` array may contain multiple mechanisms for a single server.
+Each of them MUST work.
+
 The client can choose which of those to use, based on implementation
 support, available authentication data, and client policy.
 
@@ -279,9 +286,9 @@ The client SHOULD test the configuration during setup, with an actual
 authentication attempt.
 
 If the authentication fails, the client decides based on the
-authentication error code how to proceed. E.g. if the authentiocation
+authentication error code how to proceed. E.g. if the authentication
 method itself failed, or the error code indicates a systemic failure,
-the client SHOULD use another authentication method from the list.
+the client MAY use another authentication method from the list.
 
 If the authentication method is working, but the error code indicated
 that the username or password was wrong, then the client MAY ask the
@@ -289,6 +296,7 @@ user to correct the password.
 
 For that reason, the server SHOULD be specific in the error codes and
 allow the client to distinguish between
+
 * an unsupported or non-working authentication method or other
   systemic failures
 * the client being rejected by the server
@@ -298,7 +306,7 @@ allow the client to distinguish between
 
 If the server were to return the same error code for all these cases, the
 client might tell the user that the password is wrong, and the user starts
-attempting other passwords, potentially revealing passwords to other
+attempting other passwords, potentially revealing passwords to unrelated
 higher-value assets, which is highly dangerous.
 
 If the authentification succeeded, the client SHOULD take note of the
@@ -307,17 +315,16 @@ until an explicit reconfiguration occurs. During normal everyday operation,
 the client SHOULD NOT fallback nor attempt multiple different authentication
 methods.
 
-### username
+### Username
 
 For all protocols, the email address that the user entered during setup
-will be used as username on the protocol level.
+will be used by the client as username on the target protocol level.
 
 The provider MUST ensure that any valid email address that the user might enter
 during setup is a valid username for all servers given in this configuration.
 This may require a mapping on the server level from email address to internal
 username. This mapping happens internally in the server and the client
-is not involved in this. The client will use the email address as username,
-and the server will ensure that this works.
+is not involved in this mapping.
 
 ### Multiple server protocols
 
@@ -327,13 +334,14 @@ protocols. That's why the PACC file SHOULD contain all protocols that the
 provider offers to its users.
 
 The client chooses which protocol to use, based on
+
 * which protocols the client implements,
-* the configuration, e.g. the config specifies only an OAuth2
+* the configuration returned, e.g. the config specifies only an OAuth2
   authentication and the client either doesn't implement OAuth2, or
-  it doesn't have a client ID for this provider,
+  there is a problem in the OAuth2 flow with this provider,
 * client policy, e.g. the client preferring JMAP over IMAP.
 
-Server protocols, and properties that the client does not support
+Server protocols that the client does not support
 MUST be ignored and the client MUST continue to parse the other
 server sections, which may contain configs that the client
 understands and supports. The client ignores the file only if there
@@ -341,22 +349,22 @@ is no supported and working config found.
 
 ### TLS validation
 
-In all cases where TLS is used, either directly or using STARTTLS,
+In all cases where TLS is used,
 the client MUST validate the TLS certificate and ensure that the
 certificate is valid for the hostname given in this config. If not,
 or if the TLS certificate is otherwise invalid, the client MUST
 either disconnect or MAY warn the user of the
-dangers and ask for user confirmation. Such warning and confirmation
-MAY only be allowed at original configuration and MUST NOT be allowed
-during normal everyday connection.
+dangers and ask for user confirmation. Such fallback with warning and
+confirmation is allowed only at original configuration and MUST NOT be
+allowed during normal everyday connection.
 
-If the server had a valid TLS certificate during original configuration
-and the TLS certificate is invalid during normal connection, the
+If the server had a valid TLS certificate during original configuration,
+and the TLS certificate is later invalid during normal connection, the
 client MUST disconnect.
 
-If the problem is that the TLS certificate expired recently,
-the client MAY not consider that a failure during normal connection
-and use other recovery mechanisms.
+As an exception, if the problem is that the TLS certificate expired recently,
+the client MAY choose to not consider that a failure during normal connection
+and MAY use other recovery mechanisms.
 
 ## provider
 
@@ -367,8 +375,8 @@ and `logo`.
 
 E.g.
 
-    name: "ACME BestService WorkPlaceMail",
-    shortName: "ACME",
+    name: "ACME BestService WorkPlaceMail"
+    shortName: "ACME"
 
 The `name` property contains the name of the provider, e.g.
 as preferred by the marketing of the provider itself. It SHOULD be no
@@ -420,10 +428,10 @@ Webpage with information for mail application developers.
 
 ### contact
 
-E.g. `: "mailto:it@team.example.net"`
+E.g. `contact: "mailto:it@team.example.net"`
 
 Allows a direct contact from mail application developers to mail
-provider adminstrators. This is useful to resolve issues with this
+server adminstrators. This is useful to resolve issues with this
 configuration, e.g. when the configuration in the PACC file is outdated,
 or with the mail servers, e.g. when the mail server is misconfigured or
 otherwise has a compatibility or security problem.
@@ -449,29 +457,27 @@ The client MUST NOT reject a config file solely based on the version number.
 
 The client SHOULD validate that the config file is valid JSON as per RFC 8259,
 and if the JSON syntax is invalid, the client SHOULD ignore the entire file.
-In contrast, if there are syntactically valid, but unknown JSON
+In contrast, if there are merely unknown JSON
 properties, the client MUST NOT ignore the file.
 
-The client SHOULD take only the properties that are
+The client SHOULD read only the properties that are
 supported by the client, and MUST ignore the others that are unknown
 to the client.
 
 The client may optionally want to validate the XML before parsing it.
 This is not required. If the client choses to validate, the validation
 MUST ignore unknown properties and MUST NOT drop or ignore a configuration
-that contains unknown properties. This is needed to allow future extensions
+that contains unknown properties. This is required to allow future extensions
 of the format without breaking existing clients.
 
 # Config retrieval by mail clients
 
 The mail client application, when it needs the configuration for a given email
 address, will perform several steps to retrieve the configuration from
-the email domain and from the email hoster.
+the email domain or from the email hoster.
 
-The steps are ordered by priority. They may all be requested at the same time,
-but a higher priorty result that is available SHOULD be preferred over a lower
-priority one, even if the lower priority one is available earlier. Exceptions
-apply when a higher priority result is either invalid or outdated.
+The client MAY perform both queries in parallel, but MUST give precendence
+to the results from the direct email domain, even if they return slower.
 
 In the URLs below, `%EMAILDOMAIN%` shall be replaced with the email domain
 extracted from the email address that the user entered and wishes to use.
@@ -492,7 +498,9 @@ of the user's email address:
 
     DNS SRV _pacc._https.%EMAILDOMAIN%.
 
-E.g. `DNS SRV _pacc._https.example.com.`
+e.g.
+
+    DNS SRV _pacc._https.example.com.
 
 ### DNS SRV response
 
@@ -501,7 +509,9 @@ where the PACC config file can be found:
 
     _pacc._https.%EMAILDOMAIN%.   SRV   0 0 443 %HOSTNAME%.
 
-e.g. `_pacc._https.example.com.   SRV   0 0 443 pacc.example.com.`
+e.g.
+
+    _pacc._https.example.com.   SRV   0 0 443 pacc.example.com.
 
 The port MUST be 443. The priority and weight may be disregarded. Only the
 hostname is extracted from the response.
@@ -509,16 +519,18 @@ hostname is extracted from the response.
 ### URL construction
 
 The client takes the hostname, and constructs the PACC retrieval URL from it,
-by using `https` on that hostname, standard port 443, and path
+by using `https`, that hostname, standard port 443, and path
 `/.well-known/pacc.json`:
 
     https://%HOSTNAME%/.well-known/pacc.json
 
-e.g. `https://pacc.example.com/.well-known/pacc.json`
+e.g.
+
+    https://pacc.example.com/.well-known/pacc.json
 
 ### Config file retrieval
 
-The client retrieves the `https` URL constructed in the last step.
+The client retrieves the `https` URL constructed in the previous step.
 
 The HTTP `Accept` request header MUST allow `text/json`, e.g.
 `Accept: text/json` or `text/*` or `*/*`.
@@ -534,8 +546,8 @@ hosted by a hosting company, which is then responsible for the email of dozens
 or thousands of domains. For these hosters, it may be difficult to set up the
 configuration server with valid TLS certificate for each of their
 customers, and to convince their customers to modify their root DNS
-specifically for autoconfig. To handle such domains,
-the protocol first needs to find the domain hosting the email.
+specifically for PACC. To handle such domains,
+the protocol first needs to find the domain of the party hosting the email.
 
 If the query on the email domain as described above yields no result,
 the client SHOULD perform a DNS MX lookup on the email domain, and retrieve
@@ -548,7 +560,9 @@ The client makes a DNS MX lookup on the domain of the user's email address:
 
     DNS MX %EMAILDOMAIN%.
 
-E.g. `DNS MX example.com.`
+e.g.
+
+    DNS MX example.com.
 
 ### DNS MX response
 
@@ -558,6 +572,7 @@ that accept email for the user's email address:
     example.com   MX   %PRIORITY% %MXSERVER1%.
 
 e.g.
+
     example.com   MX   10 beetruche1.mx.example.net.
     example.com   MX   10 beetruche2.mx.example.net.
     example.com   MX   30 beetruche3.mx.example.net.
@@ -574,9 +589,11 @@ of the MX server retrieved in the last step:
 
     DNS SRV _paccmx._https.%EMAILDOMAIN%.
 
-E.g. `DNS SRV _paccmx._https.beetruche1.mx.example.net.`
+e.g.
 
-Please note that the service in this case is `_paccmx`, not `_pacc`.
+    DNS SRV _paccmx._https.beetruche1.mx.example.net.
+
+Please note that the service part in this case is `_paccmx`, not `_pacc`.
 
 ### DNS SRV response
 
@@ -585,7 +602,9 @@ where the PACC config file can be found:
 
     _paccmx._https.%MXSERVER%.   SRV   0 0 443 %HOSTNAME%.
 
-e.g. `_paccmx._https.beetruche1.mx.example.net.   SRV   0 0 443 pacc.example.net.`
+e.g.
+
+    _paccmx._https.beetruche1.mx.example.net.   SRV   0 0 443 pacc.example.net.
 
 The port MUST be 443. The priority and weight may be disregarded. Only the
 hostname is extracted from the response.
