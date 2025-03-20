@@ -1,0 +1,2782 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>PACC - Automatic configuration for mail servers, calendar and contacts sync</title>
+<meta content="Ben Bucksch" name="author">
+<meta content="
+       Set up a mail account with only email address and password.
+This uses the DNS SRV mechanism to find the configuration.
+It is meant for new mail servers that adapt their configuration
+to current best practices. 
+    " name="description">
+<meta content="xml2rfc 3.28.0" name="generator">
+<meta content="configuration" name="keyword">
+<meta content="autoconfig" name="keyword">
+<meta content="autodiscover" name="keyword">
+<meta content="mail" name="keyword">
+<meta content="email" name="keyword">
+<meta content="calendar" name="keyword">
+<meta content="contacts" name="keyword">
+<meta content="IMAP" name="keyword">
+<meta content="SMTP" name="keyword">
+<meta content="JMAP" name="keyword">
+<meta content="OAuth2" name="keyword">
+<meta content="draft-bucksch-mailmaint-pacc-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.28.0
+    Python 3.12.9
+    ConfigArgParse 1.7
+    google-i18n-address 3.1.1
+    intervaltree 3.1.0
+    Jinja2 3.1.6
+    lxml 5.3.0
+    platformdirs 4.3.6
+    pycountry 24.6.1
+    PyYAML 6.0.2
+    requests 2.32.3
+    setuptools 70.3.0
+    wcwidth 0.2.13
+-->
+<link href="draft-bucksch-mailmaint-pacc.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+    }
+  }
+  &.olPercent > dt {
+    float: none;
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+}
+dl:not(.dlNewline) > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+}
+@media not print {
+  :hover > a.pilcrow {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+/* Comments */
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc nav {
+    font-family: var(--font-title);
+    font-weight: 360;
+    & > ul { margin-bottom: 2em; }
+    & ul {
+      margin: 0 0 0 4px;
+      & :is(p, li) {
+        margin: 2px 0;
+      }
+    }
+  }
+  #toc a.toplink {
+    float: right;
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+    &::before { /* css hamburger */
+      float: right;
+      position: relative;
+      width: 1em;
+      height: 1px;
+      left: -164px;
+      margin: 8px 0 0 0;
+      background: white none repeat scroll 0 0;
+      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+      content: "";
+    }
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active {
+    opacity: 1;
+    & nav { display: block; }
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:is(:link, :focus, :hover),
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin: 2px 0.5em 0;
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+  #toc a.toplink {
+    margin: 8px 0.5em 0;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">PACC</td>
+<td class="right">March 2025</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Bucksch</td>
+<td class="center">Expires 21 September 2025</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">mailmaint</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-bucksch-mailmaint-pacc-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2025-03-20" class="published">20 March 2025</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2025-09-21">21 September 2025</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">B. Bucksch</div>
+<div class="org">Beonex</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">PACC - Automatic configuration for mail servers, calendar and contacts sync</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">Set up a mail account with only email address and password.
+This uses the DNS SRV mechanism to find the configuration.
+It is meant for new mail servers that adapt their configuration
+to current best practices.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://benbucksch.github.io/pacc/draft-bucksch-mailmaint-pacc.html">https://benbucksch.github.io/pacc/draft-bucksch-mailmaint-pacc.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-bucksch-mailmaint-pacc/">https://datatracker.ietf.org/doc/draft-bucksch-mailmaint-pacc/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        mailmaint Working Group mailing list (<span><a href="mailto:mailmaint@ietf.org">mailto:mailmaint@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/mailmaint/">https://mailarchive.ietf.org/arch/browse/mailmaint/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/mailmaint/">https://www.ietf.org/mailman/listinfo/mailmaint/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/benbucksch/pacc">https://github.com/benbucksch/pacc</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 21 September 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2025 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-data-format" class="internal xref">Data format</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1" class="keepWithNext"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-json-config-file" class="internal xref">JSON config file</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
+                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="auto internal xref">2.2</a>.  <a href="#name-servers" class="internal xref">Servers</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.1">
+                    <p id="section-toc.1-1.2.2.2.2.1.1" class="keepWithNext"><a href="#section-2.2.1" class="auto internal xref">2.2.1</a>.  <a href="#name-protocol" class="internal xref">Protocol</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.2">
+                    <p id="section-toc.1-1.2.2.2.2.2.1"><a href="#section-2.2.2" class="auto internal xref">2.2.2</a>.  <a href="#name-url" class="internal xref">URL</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.3">
+                    <p id="section-toc.1-1.2.2.2.2.3.1"><a href="#section-2.2.3" class="auto internal xref">2.2.3</a>.  <a href="#name-authentication" class="internal xref">Authentication</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.4">
+                    <p id="section-toc.1-1.2.2.2.2.4.1"><a href="#section-2.2.4" class="auto internal xref">2.2.4</a>.  <a href="#name-username" class="internal xref">username</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.5">
+                    <p id="section-toc.1-1.2.2.2.2.5.1"><a href="#section-2.2.5" class="auto internal xref">2.2.5</a>.  <a href="#name-multiple-server-protocols" class="internal xref">Multiple server protocols</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.6">
+                    <p id="section-toc.1-1.2.2.2.2.6.1"><a href="#section-2.2.6" class="auto internal xref">2.2.6</a>.  <a href="#name-tls-validation" class="internal xref">TLS validation</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3">
+                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="auto internal xref">2.3</a>.  <a href="#name-provider" class="internal xref">provider</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3.2.1">
+                    <p id="section-toc.1-1.2.2.3.2.1.1"><a href="#section-2.3.1" class="auto internal xref">2.3.1</a>.  <a href="#name-name-and-shortname" class="internal xref">name and shortName</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3.2.2">
+                    <p id="section-toc.1-1.2.2.3.2.2.1"><a href="#section-2.3.2" class="auto internal xref">2.3.2</a>.  <a href="#name-logo" class="internal xref">logo</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.4">
+                <p id="section-toc.1-1.2.2.4.1"><a href="#section-2.4" class="auto internal xref">2.4</a>.  <a href="#name-help" class="internal xref">help</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.4.2.1">
+                    <p id="section-toc.1-1.2.2.4.2.1.1"><a href="#section-2.4.1" class="auto internal xref">2.4.1</a>.  <a href="#name-documentation" class="internal xref">documentation</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.4.2.2">
+                    <p id="section-toc.1-1.2.2.4.2.2.1"><a href="#section-2.4.2" class="auto internal xref">2.4.2</a>.  <a href="#name-developer" class="internal xref">developer</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.4.2.3">
+                    <p id="section-toc.1-1.2.2.4.2.3.1"><a href="#section-2.4.3" class="auto internal xref">2.4.3</a>.  <a href="#name-contact" class="internal xref">contact</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.5">
+                <p id="section-toc.1-1.2.2.5.1"><a href="#section-2.5" class="auto internal xref">2.5</a>.  <a href="#name-version" class="internal xref">version</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.6">
+                <p id="section-toc.1-1.2.2.6.1"><a href="#section-2.6" class="auto internal xref">2.6</a>.  <a href="#name-json-validation" class="internal xref">JSON validation</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-config-retrieval-by-mail-cl" class="internal xref">Config retrieval by mail clients</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-email-address-domain" class="internal xref">Email address domain</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1.2.1">
+                    <p id="section-toc.1-1.3.2.1.2.1.1"><a href="#section-3.1.1" class="auto internal xref">3.1.1</a>.  <a href="#name-dns-srv-query" class="internal xref">DNS SRV query</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1.2.2">
+                    <p id="section-toc.1-1.3.2.1.2.2.1"><a href="#section-3.1.2" class="auto internal xref">3.1.2</a>.  <a href="#name-dns-srv-response" class="internal xref">DNS SRV response</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1.2.3">
+                    <p id="section-toc.1-1.3.2.1.2.3.1"><a href="#section-3.1.3" class="auto internal xref">3.1.3</a>.  <a href="#name-url-construction" class="internal xref">URL construction</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1.2.4">
+                    <p id="section-toc.1-1.3.2.1.2.4.1"><a href="#section-3.1.4" class="auto internal xref">3.1.4</a>.  <a href="#name-config-file-retrieval" class="internal xref">Config file retrieval</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-mx-domain" class="internal xref">MX domain</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.1">
+                    <p id="section-toc.1-1.3.2.2.2.1.1"><a href="#section-3.2.1" class="auto internal xref">3.2.1</a>.  <a href="#name-dns-mx-query" class="internal xref">DNS MX query</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.2">
+                    <p id="section-toc.1-1.3.2.2.2.2.1"><a href="#section-3.2.2" class="auto internal xref">3.2.2</a>.  <a href="#name-dns-mx-response" class="internal xref">DNS MX response</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.3">
+                    <p id="section-toc.1-1.3.2.2.2.3.1"><a href="#section-3.2.3" class="auto internal xref">3.2.3</a>.  <a href="#name-dns-srv-query-2" class="internal xref">DNS SRV query</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.4">
+                    <p id="section-toc.1-1.3.2.2.2.4.1"><a href="#section-3.2.4" class="auto internal xref">3.2.4</a>.  <a href="#name-dns-srv-response-2" class="internal xref">DNS SRV response</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-example-dns-srv-records-for" class="internal xref">Example DNS SRV records for an email domain</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4">
+                <p id="section-toc.1-1.3.2.4.1"><a href="#section-3.4" class="auto internal xref">3.4</a>.  <a href="#name-example-dns-srv-records-for-" class="internal xref">Example DNS SRV records for an email hoster</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5">
+                <p id="section-toc.1-1.3.2.5.1"><a href="#section-3.5" class="auto internal xref">3.5</a>.  <a href="#name-no-authentication-for-confi" class="internal xref">No authentication for config</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-config-validation" class="internal xref">Config validation</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-user-approval" class="internal xref">User approval</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-login-test" class="internal xref">Login test</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-oauth2-windows" class="internal xref">OAuth2 windows</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
+                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-oauth2-requirements" class="internal xref">OAuth2 requirements</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-alternatives-considered" class="internal xref">Alternatives considered</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-capabilities" class="internal xref">CAPABILITIES</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-risk" class="internal xref">Risk</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-dns" class="internal xref">DNS</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-config-updates" class="internal xref">Config updates</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.4">
+                <p id="section-toc.1-1.6.2.4.1"><a href="#section-6.4" class="auto internal xref">6.4</a>.  <a href="#name-server-security" class="internal xref">Server security</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-registration" class="internal xref">Registration</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-contents" class="internal xref">Contents</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-initial-registration" class="internal xref">Initial registration</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-addition-of-dns-srv-service" class="internal xref">Addition of DNS SRV Service Names pacc and pacc_mx</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4.2.1">
+                    <p id="section-toc.1-1.7.2.4.2.1.1"><a href="#section-7.4.1" class="auto internal xref">7.4.1</a>.  <a href="#name-new-records-to-be-registere" class="internal xref">New records to be registered</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4.2.2">
+                    <p id="section-toc.1-1.7.2.4.2.2.1"><a href="#section-7.4.2" class="auto internal xref">7.4.2</a>.  <a href="#name-registration-of-srv-service" class="internal xref">Registration of SRV Service Name pacc</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4.2.3">
+                    <p id="section-toc.1-1.7.2.4.2.3.1"><a href="#section-7.4.3" class="auto internal xref">7.4.3</a>.  <a href="#name-registration-of-srv-service-" class="internal xref">Registration of SRV Service Name paccmx</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4.2.4">
+                    <p id="section-toc.1-1.7.2.4.2.4.1"><a href="#section-7.4.4" class="auto internal xref">7.4.4</a>.  <a href="#name-use-of-_https-as-protocol" class="internal xref">Use of _https as protocol</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">This protocol allows users to set up their existing email account in a new
+mail client application, by entering only their name, email address, and
+password. The mail application, by means of PACC,
+will determine the parameters that are required, including the URL,
+authentication method, and OAuth2 server. Contact sync and calendar
+can also be set up automatically.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">The protocol works by first determining the domain from the email address, and
+the querying a DNS SRV record at the email provider, which returns a URL
+to a JSON document, which then contains the configuration parameters.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">While this PACC protocol fulfills the same purpose as the earlier Autoconfig
+protocol, it uses a different mechanism - DNS SRV instead of well-known URLs -,
+and requires that the server employs certain best practices, e.g. to use
+the full email address as username. PACC mandates Direct TLS for all servers.
+For OAuth2, it uses Open ID Connect and Dynamic Client Registration.<a href="#section-1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="data-format">
+<section id="section-2">
+      <h2 id="name-data-format">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-data-format" class="section-name selfRef">Data format</a>
+      </h2>
+<p id="section-2-1">The configuration file has the following data format.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">The MIME type is <code>text/json</code>.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<div id="json-config-file">
+<section id="section-2.1">
+        <h3 id="name-json-config-file">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-json-config-file" class="section-name selfRef">JSON config file</a>
+        </h3>
+<p id="section-2.1-1">The following example shows the syntax of the JSON config file returned.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-2.1-2">
+<pre>
+{
+  servers: {
+    jmap: {
+      url: "https://jmap.example.net/session",
+      authentication: [
+        "OAuth2",
+        "http-basic",
+      ]
+    },
+    imap: {
+      url: "imaps://imap.example.net",
+      authentication: [
+        "OAuth2",
+        "sasl-plain",
+      ]
+    },
+    pop3: {
+      url: "imaps://pop3.example.net",
+      authentication: [
+        "OAuth2",
+        "sasl-SCRAM-SHA-256-PLUS",
+        "sasl-plain",
+        "native"
+      ]
+    },
+    smtp: {
+      url: "imaps://pop3.example.net",
+      authentication: [
+        "OAuth2",
+        "sasl-SCRAM-SHA-256-PLUS",
+        "sasl-plain"
+      ]
+    },
+    caldav: {
+      url: "https://sync.example.net/calendar/",
+      authentication: [
+        "OAuth2",
+        "http-basic",
+      ]
+    },
+    carddav: {
+      url: "https://sync.example.net/contacts/",
+      authentication: [
+        "OAuth2",
+        "http-basic",
+      ]
+    }
+  },
+  oAuth2: {
+    issuer: "auth.example.net"
+  },
+  provider: {
+    name: "ACME BestService WorkPlaceMail",
+    shortName: "ACME",
+    logo: [
+      {
+        url: "https://www.example.net/logo.svg",
+        mimetype: "image/svg"
+      },
+      {
+        url: "https://www.example.net/logo.png",
+        mimetype: "image/png",
+        width: "128",
+        height: "128",
+      },
+      {
+        url: "https://www.example.net/logo-512.png",
+        mimetype: "image/png",
+        width: "512",
+        height: "512",
+      }
+    ]
+  },
+  help: {
+    documentation: "https://help.example.net/howto/set-up-your-mail-app.html",
+    developer: "https://developer.example.net/client-apps/",
+    contact: "mailto:it@team.example.net"
+  },
+  version: "1.0"
+}
+</pre><a href="#section-2.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="servers">
+<section id="section-2.2">
+        <h3 id="name-servers">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-servers" class="section-name selfRef">Servers</a>
+        </h3>
+<p id="section-2.2-1">E.g.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-2.2-2">
+<pre>
+servers: {
+  jmap: {
+    url: "https://jmap.example.net/session",
+    authentication: [ ... }
+  },
+  imap: { ... }
+}
+</pre><a href="#section-2.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-2.2-3"><code>server</code> is a top-level property containing an object map. The key is a
+<code>protocol</code> name, defined in section "Protocol". The value is an object
+which describes the server and is defined in section "Server object".<a href="#section-2.2-3" class="pilcrow">¶</a></p>
+<div id="protocol">
+<section id="section-2.2.1">
+          <h4 id="name-protocol">
+<a href="#section-2.2.1" class="section-number selfRef">2.2.1. </a><a href="#name-protocol" class="section-name selfRef">Protocol</a>
+          </h4>
+<p id="section-2.2.1-1">The <code>protocol</code> is the key of the pbject map inside the <code>servers</code> property.<a href="#section-2.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.1-2">It specifies which wire protocol to use for this server.<a href="#section-2.2.1-2" class="pilcrow">¶</a></p>
+<table class="center" id="table-1">
+            <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Protocol</th>
+                <th class="text-left" rowspan="1" colspan="1">URL scheme</th>
+                <th class="text-left" rowspan="1" colspan="1">Port</th>
+                <th class="text-left" rowspan="1" colspan="1">Name</th>
+                <th class="text-left" rowspan="1" colspan="1">Specification</th>
+                <th class="text-left" rowspan="1" colspan="1">Additional Properties</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>jmap</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">https</td>
+                <td class="text-left" rowspan="1" colspan="1">443</td>
+                <td class="text-left" rowspan="1" colspan="1">JMAP</td>
+                <td class="text-left" rowspan="1" colspan="1">RFC 8620, RFC 8621, RFC 8887, RFC 9610 et al</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>imap</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">imaps</td>
+                <td class="text-left" rowspan="1" colspan="1">993</td>
+                <td class="text-left" rowspan="1" colspan="1">IMAP</td>
+                <td class="text-left" rowspan="1" colspan="1">RFC 9051 or RFC 3501, et al</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>pop3</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">pop3s</td>
+                <td class="text-left" rowspan="1" colspan="1">995</td>
+                <td class="text-left" rowspan="1" colspan="1">POP3</td>
+                <td class="text-left" rowspan="1" colspan="1">RFC 1939, RFC 5034</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>smtp</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">submissions</td>
+                <td class="text-left" rowspan="1" colspan="1">465</td>
+                <td class="text-left" rowspan="1" colspan="1">SMTP</td>
+                <td class="text-left" rowspan="1" colspan="1">RFC 5321, RFC 2822</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>caldav</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">https</td>
+                <td class="text-left" rowspan="1" colspan="1">443</td>
+                <td class="text-left" rowspan="1" colspan="1">CalDAV</td>
+                <td class="text-left" rowspan="1" colspan="1">RFC 4791</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>carddav</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">https</td>
+                <td class="text-left" rowspan="1" colspan="1">443</td>
+                <td class="text-left" rowspan="1" colspan="1">CardDav</td>
+                <td class="text-left" rowspan="1" colspan="1">RFC 6352</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>webdav</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">https</td>
+                <td class="text-left" rowspan="1" colspan="1">443</td>
+                <td class="text-left" rowspan="1" colspan="1">WebDAV</td>
+                <td class="text-left" rowspan="1" colspan="1">RFC 4918</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>managesieve</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">sieves</td>
+                <td class="text-left" rowspan="1" colspan="1">443</td>
+                <td class="text-left" rowspan="1" colspan="1">ManageSieve</td>
+                <td class="text-left" rowspan="1" colspan="1">RFC 5804, RFC 5228</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>ews</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">https</td>
+                <td class="text-left" rowspan="1" colspan="1">443</td>
+                <td class="text-left" rowspan="1" colspan="1">Exchange Web Services</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>activeSync</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">https</td>
+                <td class="text-left" rowspan="1" colspan="1">443</td>
+                <td class="text-left" rowspan="1" colspan="1">ActiveSync</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>graph</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">https</td>
+                <td class="text-left" rowspan="1" colspan="1">443</td>
+                <td class="text-left" rowspan="1" colspan="1">Microsoft Graph</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+            </tbody>
+          </table>
+<p id="section-2.2.1-4">Other protocol names can be added using an IANA registry. Their
+respective registrations need to define:
+* Protocol: The <code>protocol</code> name, as appearing in the JSON
+* URL scheme: Which URL scheme or schemes are to used in the URL
+* Port: The default port number, if none is given in the URL
+* Name: The commonly used name of the protocol
+* Specification: Which RFCs or document specifies the protocol, and
+* Additional Properties: (Optional) Protocol-specific JSON properties and
+  their meaning.<a href="#section-2.2.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="url">
+<section id="section-2.2.2">
+          <h4 id="name-url">
+<a href="#section-2.2.2" class="section-number selfRef">2.2.2. </a><a href="#name-url" class="section-name selfRef">URL</a>
+          </h4>
+<p id="section-2.2.2-1">E.g.
+        url: "https://jmap.example.net/session",
+        url: "imaps://imap.example.net:1993",<a href="#section-2.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.2-2">The <code>url</code> property specifies the where and how to contact the server.<a href="#section-2.2.2-2" class="pilcrow">¶</a></p>
+<div id="url-scheme">
+<section id="section-2.2.2.1">
+            <h5 id="name-url-scheme">
+<a href="#section-2.2.2.1" class="section-number selfRef">2.2.2.1. </a><a href="#name-url-scheme" class="section-name selfRef">URL scheme</a>
+            </h5>
+<ul class="normal">
+<li class="normal" id="section-2.2.2.1-1.1">
+                <p id="section-2.2.2.1-1.1.1">For protocols based on HTTPS or WebDAV, the URL scheme is <code>https</code>.<a href="#section-2.2.2.1-1.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-2.2.2.1-1.2">
+                <p id="section-2.2.2.1-1.2.1">For protocols based on WebSockets, the URL scheme is <code>wss</code>.<a href="#section-2.2.2.1-1.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-2.2.2.1-1.3">
+                <p id="section-2.2.2.1-1.3.1">TCP-based protocols might use other URL schemes, like <code>imaps</code>,
+as defined in section "Protocols".<a href="#section-2.2.2.1-1.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</section>
+</div>
+<div id="hostname">
+<section id="section-2.2.2.2">
+            <h5 id="name-hostname">
+<a href="#section-2.2.2.2" class="section-number selfRef">2.2.2.2. </a><a href="#name-hostname" class="section-name selfRef">Hostname</a>
+            </h5>
+<p id="section-2.2.2.2-1">The hostname in the URL <span class="bcp14">MUST</span> be the fully qualified domain name of the
+server which the client is supposed to contact for that protocol.<a href="#section-2.2.2.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="port">
+<section id="section-2.2.2.3">
+            <h5 id="name-port">
+<a href="#section-2.2.2.3" class="section-number selfRef">2.2.2.3. </a><a href="#name-port" class="section-name selfRef">Port</a>
+            </h5>
+<p id="section-2.2.2.3-1">If no port is in the URL, the Port as defined in the "Protocols" or in the
+IANA registry is used as the default port. If the server port matches that
+default port, it <span class="bcp14">SHOULD NOT</span> be specified in the URL.
+If the URL contains an explicit port, that part <span class="bcp14">MUST</span> be used by the client.<a href="#section-2.2.2.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="path">
+<section id="section-2.2.2.4">
+            <h5 id="name-path">
+<a href="#section-2.2.2.4" class="section-number selfRef">2.2.2.4. </a><a href="#name-path" class="section-name selfRef">Path</a>
+            </h5>
+<p id="section-2.2.2.4-1">For some protocols like IMAP, POP3 and SMTP, the path is empty.<a href="#section-2.2.2.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="authentication">
+<section id="section-2.2.3">
+          <h4 id="name-authentication">
+<a href="#section-2.2.3" class="section-number selfRef">2.2.3. </a><a href="#name-authentication" class="section-name selfRef">Authentication</a>
+          </h4>
+<p id="section-2.2.3-1">E.g. <code>authentication: [ "http-basic" ]</code> for HTTPS or
+<code>authentication: [ "sasl-SCRAM-SHA-256-1" ]</code> for TCP.<a href="#section-2.2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.3-2">The <code>authentication</code> property is an array that defines which authentication
+methods are available to use.<a href="#section-2.2.3-2" class="pilcrow">¶</a></p>
+<div id="authentication-methods">
+<section id="section-2.2.3.1">
+            <h5 id="name-authentication-methods">
+<a href="#section-2.2.3.1" class="section-number selfRef">2.2.3.1. </a><a href="#name-authentication-methods" class="section-name selfRef">Authentication methods</a>
+            </h5>
+<ul class="normal">
+<li class="normal" id="section-2.2.3.1-1.1">
+                <p id="section-2.2.3.1-1.1.1">For HTTPS or WebSocket-based protocols, these can be authentication methods
+used in <code>WWW-authenticate</code> the HTTP header. The value is <code>http-" plus the
+HTTP authentication scheme name, case-insensitive. See RFC 7617 and 7616.
+E.g. </code>http-basic<code> for </code>WWW-Authenticate: Basic<code>, or </code>http-NTLM`.<a href="#section-2.2.3.1-1.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-2.2.3.1-1.2">
+                <p id="section-2.2.3.1-1.2.1">For TCP-based protocols, these can be SASL schemes. The value is <code>sasl-</code>
+plus the SASL scheme name in uppercase.
+E.g. <code>sasl-SCRAM-SHA-256-1</code> or <code>sasl-PLAIN</code>.<a href="#section-2.2.3.1-1.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-2.2.3.1-1.3">
+                <p id="section-2.2.3.1-1.3.1">For OAuth2, the value is <code>OAuth2</code>.<a href="#section-2.2.3.1-1.3.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2.3.1-1.3.2.1">
+                    <p id="section-2.2.3.1-1.3.2.1.1">With TCP, SASL <code>OAUTHBEARER</code> (current) or <code>XOAUTH2</code> (deprecated) or
+successors may be used.<a href="#section-2.2.3.1-1.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="normal" id="section-2.2.3.1-1.3.2.2">
+                    <p id="section-2.2.3.1-1.3.2.2.1">With HTTP, <code>Bearer</code> or a successor is used. See RFC 6750 Section 3.<a href="#section-2.2.3.1-1.3.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="normal" id="section-2.2.3.1-1.3.2.3">
+                    <p id="section-2.2.3.1-1.3.2.3.1">The provider <span class="bcp14">MUST</span> adhere to the requirements defined in section OAuth2
+in this specification.<a href="#section-2.2.3.1-1.3.2.3.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</section>
+</div>
+<div id="multiple-authentication-alternatives">
+<section id="section-2.2.3.2">
+            <h5 id="name-multiple-authentication-alt">
+<a href="#section-2.2.3.2" class="section-number selfRef">2.2.3.2. </a><a href="#name-multiple-authentication-alt" class="section-name selfRef">Multiple authentication alternatives</a>
+            </h5>
+<p id="section-2.2.3.2-1">The <code>authentication</code> array may contain multiple mechanisms for a single server.
+The client can choose which of those to use, based on implementation
+support, available authentication data, and client policy.<a href="#section-2.2.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.3.2-2">If none of the authentication methods are supported by the client,
+the client <span class="bcp14">MUST</span> ignore that server section and use the remaining server
+sections.<a href="#section-2.2.3.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authentication-verification-and-fallback">
+<section id="section-2.2.3.3">
+            <h5 id="name-authentication-verification">
+<a href="#section-2.2.3.3" class="section-number selfRef">2.2.3.3. </a><a href="#name-authentication-verification" class="section-name selfRef">Authentication verification and fallback</a>
+            </h5>
+<p id="section-2.2.3.3-1">The client <span class="bcp14">SHOULD</span> test the configuration during setup, with an actual
+authentication attempt.<a href="#section-2.2.3.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.3.3-2">If the authentication fails, the client decides based on the
+authentication error code how to proceed. E.g. if the authentiocation
+method itself failed, or the error code indicates a systemic failure,
+the client <span class="bcp14">SHOULD</span> use another authentication method from the list.<a href="#section-2.2.3.3-2" class="pilcrow">¶</a></p>
+<p id="section-2.2.3.3-3">If the authentication method is working, but the error code indicated
+that the username or password was wrong, then the client <span class="bcp14">MAY</span> ask the
+user to correct the password.<a href="#section-2.2.3.3-3" class="pilcrow">¶</a></p>
+<p id="section-2.2.3.3-4">For that reason, the server <span class="bcp14">SHOULD</span> be specific in the error codes and
+allow the client to distinguish between
+* an unsupported or non-working authentication method or other
+  systemic failures
+* the client being rejected by the server
+* the user being blocked from login
+* the user authentication failing due to wrong password or username
+* other reasons<a href="#section-2.2.3.3-4" class="pilcrow">¶</a></p>
+<p id="section-2.2.3.3-5">If the server were to return the same error code for all these cases, the
+client might tell the user that the password is wrong, and the user starts
+attempting other passwords, potentially revealing passwords to other
+higher-value assets, which is highly dangerous.<a href="#section-2.2.3.3-5" class="pilcrow">¶</a></p>
+<p id="section-2.2.3.3-6">If the authentification succeeded, the client <span class="bcp14">SHOULD</span> take note of the
+working configutation and use that for all subsequent connections,
+until an explicit reconfiguration occurs. During normal everyday operation,
+the client <span class="bcp14">SHOULD NOT</span> fallback nor attempt multiple different authentication
+methods.<a href="#section-2.2.3.3-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="username">
+<section id="section-2.2.4">
+          <h4 id="name-username">
+<a href="#section-2.2.4" class="section-number selfRef">2.2.4. </a><a href="#name-username" class="section-name selfRef">username</a>
+          </h4>
+<p id="section-2.2.4-1">For all protocols, the email address that the user entered during setup
+will be used as username on the protocol level.<a href="#section-2.2.4-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.4-2">The provider <span class="bcp14">MUST</span> ensure that any valid email address that the user might enter
+during setup is a valid username for all servers given in this configuration.
+This may require a mapping on the server level from email address to internal
+username. This mapping happens internally in the server and the client
+is not involved in this. The client will use the email address as username,
+and the server will ensure that this works.<a href="#section-2.2.4-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="multiple-server-protocols">
+<section id="section-2.2.5">
+          <h4 id="name-multiple-server-protocols">
+<a href="#section-2.2.5" class="section-number selfRef">2.2.5. </a><a href="#name-multiple-server-protocols" class="section-name selfRef">Multiple server protocols</a>
+          </h4>
+<p id="section-2.2.5-1">While PACC supports only a single server per protocol, it <span class="bcp14">MAY</span> give the client
+the choice of different protocols. Not all clients might implement all
+protocols. That's why the PACC file <span class="bcp14">SHOULD</span> contain all protocols that the
+provider offers to its users.<a href="#section-2.2.5-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.5-2">The client chooses which protocol to use, based on
+* which protocols the client implements,
+* the configuration, e.g. the config specifies only an OAuth2
+  authentication and the client either doesn't implement OAuth2, or
+  it doesn't have a client ID for this provider,
+* client policy, e.g. the client preferring JMAP over IMAP.<a href="#section-2.2.5-2" class="pilcrow">¶</a></p>
+<p id="section-2.2.5-3">Server protocols, and properties that the client does not support
+<span class="bcp14">MUST</span> be ignored and the client <span class="bcp14">MUST</span> continue to parse the other
+server sections, which may contain configs that the client
+understands and supports. The client ignores the file only if there
+is no supported and working config found.<a href="#section-2.2.5-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="tls-validation">
+<section id="section-2.2.6">
+          <h4 id="name-tls-validation">
+<a href="#section-2.2.6" class="section-number selfRef">2.2.6. </a><a href="#name-tls-validation" class="section-name selfRef">TLS validation</a>
+          </h4>
+<p id="section-2.2.6-1">In all cases where TLS is used, either directly or using STARTTLS,
+the client <span class="bcp14">MUST</span> validate the TLS certificate and ensure that the
+certificate is valid for the hostname given in this config. If not,
+or if the TLS certificate is otherwise invalid, the client <span class="bcp14">MUST</span>
+either disconnect or <span class="bcp14">MAY</span> warn the user of the
+dangers and ask for user confirmation. Such warning and confirmation
+<span class="bcp14">MAY</span> only be allowed at original configuration and <span class="bcp14">MUST NOT</span> be allowed
+during normal everyday connection.<a href="#section-2.2.6-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.6-2">If the server had a valid TLS certificate during original configuration
+and the TLS certificate is invalid during normal connection, the
+client <span class="bcp14">MUST</span> disconnect.<a href="#section-2.2.6-2" class="pilcrow">¶</a></p>
+<p id="section-2.2.6-3">If the problem is that the TLS certificate expired recently,
+the client <span class="bcp14">MAY</span> not consider that a failure during normal connection
+and use other recovery mechanisms.<a href="#section-2.2.6-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="provider">
+<section id="section-2.3">
+        <h3 id="name-provider">
+<a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-provider" class="section-name selfRef">provider</a>
+        </h3>
+<p id="section-2.3-1"><code>provider</code> property is a top-level property and contains <code>name</code>, <code>shortName</code>,
+and <code>logo</code>.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+<div id="name-and-shortname">
+<section id="section-2.3.1">
+          <h4 id="name-name-and-shortname">
+<a href="#section-2.3.1" class="section-number selfRef">2.3.1. </a><a href="#name-name-and-shortname" class="section-name selfRef">name and shortName</a>
+          </h4>
+<p id="section-2.3.1-1">E.g.<a href="#section-2.3.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-2.3.1-2">
+<pre>
+name: "ACME BestService WorkPlaceMail",
+shortName: "ACME",
+</pre><a href="#section-2.3.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-2.3.1-3">The <code>name</code> property contains the name of the provider, e.g.
+as preferred by the marketing of the provider itself. It <span class="bcp14">SHOULD</span> be no
+longer than 30 characters, but <span class="bcp14">MUST</span> be no longer than 60 characters.<a href="#section-2.3.1-3" class="pilcrow">¶</a></p>
+<p id="section-2.3.1-4">The <code>shortName</code> property contains the name of the provider, as
+typically used by end users. It <span class="bcp14">SHOULD</span> be no longer than 12
+characters, and it <span class="bcp14">MUST NOT</span> be longer than 20 characters.<a href="#section-2.3.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="logo">
+<section id="section-2.3.2">
+          <h4 id="name-logo">
+<a href="#section-2.3.2" class="section-number selfRef">2.3.2. </a><a href="#name-logo" class="section-name selfRef">logo</a>
+          </h4>
+<p id="section-2.3.2-1">The <code>logo</code> property contains an array of alternative logos of the provider.
+The client chooses the variant that best fits its UI and technical requirements.<a href="#section-2.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.3.2-2">Each object in the array contains the following properties:
+* <code>url</code> - Where the logo can be downloaded. The client <span class="bcp14">MAY</span> download
+  the logo file during configuration and save it locally.
+* <code>mimetype</code> - The media type of the logo. It <span class="bcp14">MUST</span> start with <code>image/</code>.
+  At least one of the logos <span class="bcp14">SHOULD</span> be of type <code>image/svg</code> or <code>image/png</code>.
+* <code>width</code> - The width in pixels of the image in the file.
+  Optional. Not given for SVG files.
+* <code>height</code> - The height in pixels of the image in the file.
+  Optional. Not given for SVG files.<a href="#section-2.3.2-2" class="pilcrow">¶</a></p>
+<p id="section-2.3.2-3">It is <span class="bcp14">RECOMMENDED</span> to include either an SVG logo, or a PNG files of sizes
+128x128 and 512x512, or all of these. Additional sizes and file formats
+<span class="bcp14">MAY</span> be included.<a href="#section-2.3.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="help">
+<section id="section-2.4">
+        <h3 id="name-help">
+<a href="#section-2.4" class="section-number selfRef">2.4. </a><a href="#name-help" class="section-name selfRef">help</a>
+        </h3>
+<p id="section-2.4-1">This is purely informational and not required for the automatic setup.
+All of the information is optional. A contact <span class="bcp14">SHOULD</span> be included.<a href="#section-2.4-1" class="pilcrow">¶</a></p>
+<div id="documentation">
+<section id="section-2.4.1">
+          <h4 id="name-documentation">
+<a href="#section-2.4.1" class="section-number selfRef">2.4.1. </a><a href="#name-documentation" class="section-name selfRef">documentation</a>
+          </h4>
+<p id="section-2.4.1-1">E.g. <code>documentation: "https://help.example.net/howto/set-up-your-mail-app.html"</code><a href="#section-2.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.4.1-2">Records the user help webpage at the provider that describes the mail
+server settings.<a href="#section-2.4.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.4.1-3">The config in the PACC file does not necessarily have to match the config
+proposed on this webpage.<a href="#section-2.4.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="developer">
+<section id="section-2.4.2">
+          <h4 id="name-developer">
+<a href="#section-2.4.2" class="section-number selfRef">2.4.2. </a><a href="#name-developer" class="section-name selfRef">developer</a>
+          </h4>
+<p id="section-2.4.2-1">E.g. <code>developer: "https://developer.example.net/client-apps/"</code><a href="#section-2.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.4.2-2">Webpage with information for mail application developers.<a href="#section-2.4.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="contact">
+<section id="section-2.4.3">
+          <h4 id="name-contact">
+<a href="#section-2.4.3" class="section-number selfRef">2.4.3. </a><a href="#name-contact" class="section-name selfRef">contact</a>
+          </h4>
+<p id="section-2.4.3-1">E.g. <code>: "mailto:it@team.example.net"</code><a href="#section-2.4.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.4.3-2">Allows a direct contact from mail application developers to mail
+provider adminstrators. This is useful to resolve issues with this
+configuration, e.g. when the configuration in the PACC file is outdated,
+or with the mail servers, e.g. when the mail server is misconfigured or
+otherwise has a compatibility or security problem.<a href="#section-2.4.3-2" class="pilcrow">¶</a></p>
+<p id="section-2.4.3-3">This <span class="bcp14">MUST NOT</span> be a generic hotline for end users, nor the genercal
+company switchboard. It <span class="bcp14">SHOULD</span> be a way to reach the technical team
+of the provider, to resolve technical issues on the side of the provider.<a href="#section-2.4.3-3" class="pilcrow">¶</a></p>
+<p id="section-2.4.3-4">Contains an URL with an email address (<code>mailto:</code> URL), phone number
+(<code>tel:</code> URL), or webpage (<code>https</code> URL) which contains this contact info.
+Note that problems might appear only after many years, so please ensure
+longevity of the contact.<a href="#section-2.4.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="version">
+<section id="section-2.5">
+        <h3 id="name-version">
+<a href="#section-2.5" class="section-number selfRef">2.5. </a><a href="#name-version" class="section-name selfRef">version</a>
+        </h3>
+<p id="section-2.5-1"><code>version</code> property is a top-level property.<a href="#section-2.5-1" class="pilcrow">¶</a></p>
+<p id="section-2.5-2">The <code>version</code> is <code>1.0</code> for the version defined in this specification.
+Higher versions are for future specifications.
+The client <span class="bcp14">MUST NOT</span> reject a config file solely based on the version number.<a href="#section-2.5-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="json-validation">
+<section id="section-2.6">
+        <h3 id="name-json-validation">
+<a href="#section-2.6" class="section-number selfRef">2.6. </a><a href="#name-json-validation" class="section-name selfRef">JSON validation</a>
+        </h3>
+<p id="section-2.6-1">The client <span class="bcp14">SHOULD</span> validate that the config file is valid JSON as per RFC 8259,
+and if the JSON syntax is invalid, the client <span class="bcp14">SHOULD</span> ignore the entire file.
+In contrast, if there are syntactically valid, but unknown JSON
+properties, the client <span class="bcp14">MUST NOT</span> ignore the file.<a href="#section-2.6-1" class="pilcrow">¶</a></p>
+<p id="section-2.6-2">The client <span class="bcp14">SHOULD</span> take only the properties that are
+supported by the client, and <span class="bcp14">MUST</span> ignore the others that are unknown
+to the client.<a href="#section-2.6-2" class="pilcrow">¶</a></p>
+<p id="section-2.6-3">The client may optionally want to validate the XML before parsing it.
+This is not required. If the client choses to validate, the validation
+<span class="bcp14">MUST</span> ignore unknown properties and <span class="bcp14">MUST NOT</span> drop or ignore a configuration
+that contains unknown properties. This is needed to allow future extensions
+of the format without breaking existing clients.<a href="#section-2.6-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="config-retrieval-by-mail-clients">
+<section id="section-3">
+      <h2 id="name-config-retrieval-by-mail-cl">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-config-retrieval-by-mail-cl" class="section-name selfRef">Config retrieval by mail clients</a>
+      </h2>
+<p id="section-3-1">The mail client application, when it needs the configuration for a given email
+address, will perform several steps to retrieve the configuration from
+the email domain and from the email hoster.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">The steps are ordered by priority. They may all be requested at the same time,
+but a higher priorty result that is available <span class="bcp14">SHOULD</span> be preferred over a lower
+priority one, even if the lower priority one is available earlier. Exceptions
+apply when a higher priority result is either invalid or outdated.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-3">In the URLs below, <code>%EMAILDOMAIN%</code> shall be replaced with the email domain
+extracted from the email address that the user entered and wishes to use.
+For example, for "fred@example.net", the email domain is "example.net", and
+for "fred@test.cs.example.net", the email domain is "test.cs.example.net".<a href="#section-3-3" class="pilcrow">¶</a></p>
+<div id="email-address-domain">
+<section id="section-3.1">
+        <h3 id="name-email-address-domain">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-email-address-domain" class="section-name selfRef">Email address domain</a>
+        </h3>
+<p id="section-3.1-1">First step is to directly ask the mail provider and allow it to return the
+configuration. This step ensures that the protocol is decentralized and the
+mail provider is in control of the configuration issued to mail clients.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<div id="dns-srv-query">
+<section id="section-3.1.1">
+          <h4 id="name-dns-srv-query">
+<a href="#section-3.1.1" class="section-number selfRef">3.1.1. </a><a href="#name-dns-srv-query" class="section-name selfRef">DNS SRV query</a>
+          </h4>
+<p id="section-3.1.1-1">The client makes a DNS SRV lookup for <code>_pacc._https</code> on the domain
+of the user's email address:<a href="#section-3.1.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.1.1-2">
+<pre>
+DNS SRV _pacc._https.%EMAILDOMAIN%.
+</pre><a href="#section-3.1.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.1.1-3">E.g. <code>DNS SRV _pacc._https.example.com.</code><a href="#section-3.1.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="dns-srv-response">
+<section id="section-3.1.2">
+          <h4 id="name-dns-srv-response">
+<a href="#section-3.1.2" class="section-number selfRef">3.1.2. </a><a href="#name-dns-srv-response" class="section-name selfRef">DNS SRV response</a>
+          </h4>
+<p id="section-3.1.2-1">The DNS server returns a DNS SRV record with the hostname of the HTTPS server
+where the PACC config file can be found:<a href="#section-3.1.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.1.2-2">
+<pre>
+_pacc._https.%EMAILDOMAIN%.   SRV   0 0 443 %HOSTNAME%.
+</pre><a href="#section-3.1.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.1.2-3">e.g. <code>_pacc._https.example.com.   SRV   0 0 443 pacc.example.com.</code><a href="#section-3.1.2-3" class="pilcrow">¶</a></p>
+<p id="section-3.1.2-4">The port <span class="bcp14">MUST</span> be 443. The priority and weight may be disregarded. Only the
+hostname is extracted from the response.<a href="#section-3.1.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="url-construction">
+<section id="section-3.1.3">
+          <h4 id="name-url-construction">
+<a href="#section-3.1.3" class="section-number selfRef">3.1.3. </a><a href="#name-url-construction" class="section-name selfRef">URL construction</a>
+          </h4>
+<p id="section-3.1.3-1">The client takes the hostname, and constructs the PACC retrieval URL from it,
+by using <code>https</code> on that hostname, standard port 443, and path
+<code>/.well-known/pacc.json</code>:<a href="#section-3.1.3-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.1.3-2">
+<pre>
+https://%HOSTNAME%/.well-known/pacc.json
+</pre><a href="#section-3.1.3-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.1.3-3">e.g. <code>https://pacc.example.com/.well-known/pacc.json</code><a href="#section-3.1.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="config-file-retrieval">
+<section id="section-3.1.4">
+          <h4 id="name-config-file-retrieval">
+<a href="#section-3.1.4" class="section-number selfRef">3.1.4. </a><a href="#name-config-file-retrieval" class="section-name selfRef">Config file retrieval</a>
+          </h4>
+<p id="section-3.1.4-1">The client retrieves the <code>https</code> URL constructed in the last step.<a href="#section-3.1.4-1" class="pilcrow">¶</a></p>
+<p id="section-3.1.4-2">The HTTP <code>Accept</code> request header <span class="bcp14">MUST</span> allow <code>text/json</code>, e.g.
+<code>Accept: text/json</code> or <code>text/*</code> or <code>*/*</code>.<a href="#section-3.1.4-2" class="pilcrow">¶</a></p>
+<p id="section-3.1.4-3">The returned file <span class="bcp14">MUST</span> be a PACC file following the specifications in section
+"Data format".<a href="#section-3.1.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="mx-domain">
+<section id="section-3.2">
+        <h3 id="name-mx-domain">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-mx-domain" class="section-name selfRef">MX domain</a>
+        </h3>
+<p id="section-3.2-1">Many companies do not maintain their own mail server, but let their email be
+hosted by a hosting company, which is then responsible for the email of dozens
+or thousands of domains. For these hosters, it may be difficult to set up the
+configuration server with valid TLS certificate for each of their
+customers, and to convince their customers to modify their root DNS
+specifically for autoconfig. To handle such domains,
+the protocol first needs to find the domain hosting the email.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">If the query on the email domain as described above yields no result,
+the client <span class="bcp14">SHOULD</span> perform a DNS MX lookup on the email domain, and retrieve
+the MX server hostname for that domain and look for a PACC file for the
+MX hostname, using the following mechanism.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<div id="dns-mx-query">
+<section id="section-3.2.1">
+          <h4 id="name-dns-mx-query">
+<a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-dns-mx-query" class="section-name selfRef">DNS MX query</a>
+          </h4>
+<p id="section-3.2.1-1">The client makes a DNS MX lookup on the domain of the user's email address:<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.2.1-2">
+<pre>
+DNS MX %EMAILDOMAIN%.
+</pre><a href="#section-3.2.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2.1-3">E.g. <code>DNS MX example.com.</code><a href="#section-3.2.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="dns-mx-response">
+<section id="section-3.2.2">
+          <h4 id="name-dns-mx-response">
+<a href="#section-3.2.2" class="section-number selfRef">3.2.2. </a><a href="#name-dns-mx-response" class="section-name selfRef">DNS MX response</a>
+          </h4>
+<p id="section-3.2.2-1">The DNS server returns the DNS MX records with the hostnames of the MX servers
+that accept email for the user's email address:<a href="#section-3.2.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.2.2-2">
+<pre>
+example.com   MX   %PRIORITY% %MXSERVER1%.
+</pre><a href="#section-3.2.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2.2-3">e.g.
+    example.com   MX   10 beetruche1.mx.example.net.
+    example.com   MX   10 beetruche2.mx.example.net.
+    example.com   MX   30 beetruche3.mx.example.net.<a href="#section-3.2.2-3" class="pilcrow">¶</a></p>
+<p id="section-3.2.2-4">The client takes only the highest priority result, i.e. the one with the
+lowest priority number (in this example 10). If there are multiple responses
+with the same lowest priority number, the client takes only the first of them.
+The client takes the hostname of this MX server as result <code>%MXSERVER%</code>.<a href="#section-3.2.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="dns-srv-query-1">
+<section id="section-3.2.3">
+          <h4 id="name-dns-srv-query-2">
+<a href="#section-3.2.3" class="section-number selfRef">3.2.3. </a><a href="#name-dns-srv-query-2" class="section-name selfRef">DNS SRV query</a>
+          </h4>
+<p id="section-3.2.3-1">The client makes a DNS SRV lookup for <code>_paccmx._https</code> on the hostname
+of the MX server retrieved in the last step:<a href="#section-3.2.3-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.2.3-2">
+<pre>
+DNS SRV _paccmx._https.%EMAILDOMAIN%.
+</pre><a href="#section-3.2.3-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2.3-3">E.g. <code>DNS SRV _paccmx._https.beetruche1.mx.example.net.</code><a href="#section-3.2.3-3" class="pilcrow">¶</a></p>
+<p id="section-3.2.3-4">Please note that the service in this case is <code>_paccmx</code>, not <code>_pacc</code>.<a href="#section-3.2.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="dns-srv-response-1">
+<section id="section-3.2.4">
+          <h4 id="name-dns-srv-response-2">
+<a href="#section-3.2.4" class="section-number selfRef">3.2.4. </a><a href="#name-dns-srv-response-2" class="section-name selfRef">DNS SRV response</a>
+          </h4>
+<p id="section-3.2.4-1">The DNS server returns a DNS record with the hostname of the HTTPS server
+where the PACC config file can be found:<a href="#section-3.2.4-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.2.4-2">
+<pre>
+_paccmx._https.%MXSERVER%.   SRV   0 0 443 %HOSTNAME%.
+</pre><a href="#section-3.2.4-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2.4-3">e.g. <code>_paccmx._https.beetruche1.mx.example.net.   SRV   0 0 443 pacc.example.net.</code><a href="#section-3.2.4-3" class="pilcrow">¶</a></p>
+<p id="section-3.2.4-4">The port <span class="bcp14">MUST</span> be 443. The priority and weight may be disregarded. Only the
+hostname is extracted from the response.<a href="#section-3.2.4-4" class="pilcrow">¶</a></p>
+<p id="section-3.2.4-5">From here, the client continues as described above under sections
+"URL construction" and "Config file retrieval".<a href="#section-3.2.4-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="example-dns-srv-records-for-an-email-domain">
+<section id="section-3.3">
+        <h3 id="name-example-dns-srv-records-for">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-example-dns-srv-records-for" class="section-name selfRef">Example DNS SRV records for an email domain</a>
+        </h3>
+<p id="section-3.3-1">In this example, example.com hosts its email and PACC config file itself:<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.3-2">
+<pre>
+$ORIGIN example.com.
+_pacc._https   SRV   0 0 443 pacc.example.com.
+pacc           A     192.0.2.9
+</pre><a href="#section-3.3-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="example-dns-srv-records-for-an-email-hoster">
+<section id="section-3.4">
+        <h3 id="name-example-dns-srv-records-for-">
+<a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-example-dns-srv-records-for-" class="section-name selfRef">Example DNS SRV records for an email hoster</a>
+        </h3>
+<p id="section-3.4-1">In this example, example.com hosts its email with hoster example.net:<a href="#section-3.4-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.4-2">
+<pre>
+$ORIGIN example.com.
+@             MX    10 beettruce1.mx.example.net
+
+$ORIGIN example.net.
+_paccmx._https.beettruce1.mx   SRV   0 0 443 pacc.example.net.
+pacc                           A     192.0.1.9
+</pre><a href="#section-3.4-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="no-authentication-for-config">
+<section id="section-3.5">
+        <h3 id="name-no-authentication-for-confi">
+<a href="#section-3.5" class="section-number selfRef">3.5. </a><a href="#name-no-authentication-for-confi" class="section-name selfRef">No authentication for config</a>
+        </h3>
+<p id="section-3.5-1">Any of the above URLs for retrieving the config file <span class="bcp14">MUST NOT</span>
+require authentication, but <span class="bcp14">MUST</span> be public.<a href="#section-3.5-1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2">This is because the config contains the authentication method.
+Without knowing the config, the client does not know which
+authentication method to use. Given that the config is required for
+authentication, the config itself cannot require authentication.<a href="#section-3.5-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="config-validation">
+<section id="section-4">
+      <h2 id="name-config-validation">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-config-validation" class="section-name selfRef">Config validation</a>
+      </h2>
+<div id="user-approval">
+<section id="section-4.1">
+        <h3 id="name-user-approval">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-user-approval" class="section-name selfRef">User approval</a>
+        </h3>
+<p id="section-4.1-1">Independent of the mechanisms used to find the configuration, before using
+that configuration, you <span class="bcp14">SHOULD</span> display that configuration to the end user and
+let him confirm it. While doing so:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.1-2.1">
+            <p id="section-4.1-2.1.1">At least the second-level domain name(s) of the hostnames involved <span class="bcp14">MUST</span> be
+shown clearly and with high prominence.<a href="#section-4.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.1-2.2">
+            <p id="section-4.1-2.2.1">The client <span class="bcp14">MUST NOT</span> cut off parts of long second-level domains, to avoid
+spoofing. At least 63 characters <span class="bcp14">MUST</span> be displayed.<a href="#section-4.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="login-test">
+<section id="section-4.2">
+        <h3 id="name-login-test">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-login-test" class="section-name selfRef">Login test</a>
+        </h3>
+<p id="section-4.2-1">After the user confirmed the configuration, you <span class="bcp14">SHOULD</span> test the configuration,
+by attempting a login to each server configured. Only if the login succeeded,
+and the server is working, should the configuration be saved and retrieving
+and sending mail be started.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="oauth2-windows">
+<section id="section-4.3">
+        <h3 id="name-oauth2-windows">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-oauth2-windows" class="section-name selfRef">OAuth2 windows</a>
+        </h3>
+<p id="section-4.3-1">If the configuration contains OAuth2 authentication, or any other kind of
+authentication that uses a web browser with URL redirects,
+you <span class="bcp14">MUST</span> show the full URL or the second-level domain of the current page
+to the end user, at all times, including after page changes, URL changes,
+or redirects. The authentication start URL may be the email hoster, but
+it may redirect to a corporate server for login, and then back to the hoster.
+This allows for setups where the hoster is not allowed to see the
+plaintext passwords.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3-2">Showing the URL or hostname allows the end user to verify that he is
+logging in at the expected page, e.g. the login server of their company,
+instead of the email hoster's page. It is important that the user verifies
+that he enters the passwords on the right domain.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="oauth2-requirements">
+<section id="section-4.4">
+        <h3 id="name-oauth2-requirements">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-oauth2-requirements" class="section-name selfRef">OAuth2 requirements</a>
+        </h3>
+<p id="section-4.4-1">If OAuth2 is used, the OAuth2 server <span class="bcp14">MUST</span> adhere to the
+<a href="https://datatracker.ietf.org/doc/draft-ietf-mailmaint-oauth-public/">OAuth Profile for Open Public Clients</a>.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.4-2">Particularly, the Dynamic Client Registration <span class="bcp14">MUST</span> be implemented and give
+a working Client ID in response HTTP calls defined by the specification.
+Alternatively, the Client ID <code>open</code> <span class="bcp14">MUST</span> be accepted without client secret.
+Failure to do so implies a cartell or monopolistic behavior to lock out
+competing email applications from fulfilling their purpose on behalf of
+end users, which may be contrary to laws in multiple countries.<a href="#section-4.4-2" class="pilcrow">¶</a></p>
+<p id="section-4.4-3">The specifications also contain requirements for expiry times and
+the login page, which are needed for mail client applications to work.<a href="#section-4.4-3" class="pilcrow">¶</a></p>
+<p id="section-4.4-4">The OAuth2 scopes defined in the specification <span class="bcp14">MUST</span> be included and <span class="bcp14">MUST</span>
+give access to the servers published in PACC.<a href="#section-4.4-4" class="pilcrow">¶</a></p>
+<p id="section-4.4-5">A single token <span class="bcp14">MUST</span> work for all servers returned in PACC, so that a single
+user login is sufficient for all services. For that purpose, the client
+will include all relevant scopes in the authentication requests.<a href="#section-4.4-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="alternatives-considered">
+<section id="section-5">
+      <h2 id="name-alternatives-considered">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-alternatives-considered" class="section-name selfRef">Alternatives considered</a>
+      </h2>
+<div id="capabilities">
+<section id="section-5.1">
+        <h3 id="name-capabilities">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-capabilities" class="section-name selfRef">CAPABILITIES</a>
+        </h3>
+<p id="section-5.1-1">Deployments in the wild from actual ISPs show that protocol-specific commands
+to find available authentication methods, e.g. IMAP <code>CAPABILITIES</code> or POP3
+<code>CAPA</code>, are not reliable. Many email servers advertize authentication methods
+that do not work.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">Some IMAP servers are default configured to list all SASL authentication
+methods that have corresponding libraries installed on the system, independent
+on whether they are actually configured to work. The client receives a long
+list of authentication methods, and many of them do not work. Additionally,
+the server response may be only "authentication failed" and may not indicate
+whether the method failed due to lack of configuration, or because the
+password was wrong. Because some authentication servers lock the account after
+3 failed login attempts, and it may also fail due to unrelated reasons (e.g.
+username form, wrong password, etc.), the client cannot blindly issue
+countless login attempts. Locking the account must be avoided. So, simply
+attempting all methods and seeing which one works is not an option for the
+email client.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.1-3">Additionally, some email servers advertize Kerberos / GSSAPI, but when trying
+to use it, the method fails, and also runs into a long 2 minute timeout in
+some cases. End users consider that to be a broken app.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+<p id="section-5.1-4">Additionally, such commands are protocol specific and have to be implemented
+in multiple different ways.<a href="#section-5.1-4" class="pilcrow">¶</a></p>
+<p id="section-5.1-5">Finally, some non-mail protocols may not support capabilties commands that
+include authentication methods.<a href="#section-5.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-6">
+      <h2 id="name-security-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<div id="risk">
+<section id="section-6.1">
+        <h3 id="name-risk">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-risk" class="section-name selfRef">Risk</a>
+        </h3>
+<p id="section-6.1-1">If an attacker can provide a forged configuration, the provided mail hostname
+and authentication server can be controlled by the attacker, and the attacker
+can get access to the plain text password of the user. The attack can be
+implemented as man-in-the-middle, so the end user might receive mail as
+expected and never notice the attack.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-2">An attacker gaining the plain text password of a real user is a very
+significant threat for the organization, not only because mail itself can
+contain sensitive information and can be used to issue orders within the
+organization that have wide-ranging impact, but given single-sign-on
+solutions, the same username and password may give access to other resources
+at the organization, including other computers or, in the case of admin users,
+even adminstrative access to the core of the entire organization.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+<p id="section-6.1-3">Multi-factor authentication might not defend against such attacks, because the
+user may believe to be logging into his email and therefore comply with any
+multi-factor authentication steps required.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="dns">
+<section id="section-6.2">
+        <h3 id="name-dns">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-dns" class="section-name selfRef">DNS</a>
+        </h3>
+<p id="section-6.2-1">This protocol relies on DNS SRV and DNS MX lookups to find the PACC file.
+DNS requests are not signed and can therefore be intercepted, spoofed and
+manipulated. This would allow the attacker to change the PACC file URL
+and return email and authentication servers under the attacker's control,
+stealing passwords.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">One possible mitigation is to check whether the domain of the PACC file URL
+matches the user's email address domain. However, that will not be the case
+for the majority of domains, which are served by email hosters.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+<p id="section-6.2-3">Another possible mitigation is to use multiple different DNS servers and verify
+that the results match, e.g. to use the native DNS resolver of the operating
+system, and additionally also query a hardcoded DoH (DNS over HTTPS) server.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+<p id="section-6.2-4">Nonetheless, the result should be used with care. If such configs are used,
+the end user <span class="bcp14">MUST</span> explicitly confirm the config, particularly the resulting
+second-level domains. See section "User approval".<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="config-updates">
+<section id="section-6.3">
+        <h3 id="name-config-updates">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-config-updates" class="section-name selfRef">Config updates</a>
+        </h3>
+<p id="section-6.3-1">Part of the security properties of this protocol assume that the timeframe of
+possible attack is limited to the moment when the user manually sets up a new
+mail client. This moment is triggered by the end user, and a rare action -
+e.g. maybe once per year or even less, for typical setups -, so an attacker
+has limited chances to run an attack. While not a complete protection on its
+own, this reduces the risk significantly.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">However, if the mail client does regular configuration updates using this
+protocol, this security property is no longer given. For regular configuration
+updates, the mail client <span class="bcp14">MUST</span> use only mechanisms that are secure and cannot
+be tampered with by an active attacker. Furthermore, the user <span class="bcp14">SHOULD</span> still
+approve config changes.<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">But even with all these protections implemented, the mail client vendor should
+make a security assessment for the risks of making such regular updates. The
+mail client vendor should consider that servers can be hacked, and most users
+simply approve changes proposed by the app, so these give only a limited
+protection.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="server-security">
+<section id="section-6.4">
+        <h3 id="name-server-security">
+<a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-server-security" class="section-name selfRef">Server security</a>
+        </h3>
+<p id="section-6.4-1">Given that mail clients will trust the configuration, the server delivering
+the PACC file needs to be secure. A static web server offers better security.
+The server software <span class="bcp14">SHOULD</span> be updated regularly and hosted on a dedicated
+secure server with all unnecessary services and server features turned off.<a href="#section-6.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-7">
+      <h2 id="name-iana-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<div id="registration">
+<section id="section-7.1">
+        <h3 id="name-registration">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-registration" class="section-name selfRef">Registration</a>
+        </h3>
+<p id="section-7.1-1">IANA will create the following registry in a new registry group called
+"PACC":<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-2">Registry Name: "PACC Protocol Type Names"<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+<p id="section-7.1-3">Registration Procedure: Specification Required, per RFC 8126, Section 4<a href="#section-7.1-3" class="pilcrow">¶</a></p>
+<p id="section-7.1-4">Designated Expert: Ben Bucksch, author of this document.<a href="#section-7.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="contents">
+<section id="section-7.2">
+        <h3 id="name-contents">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-contents" class="section-name selfRef">Contents</a>
+        </h3>
+<p id="section-7.2-1">Table, with fields Protocol (alphanumeric), URL scheme, Port (default port number, if not specified in the URL), Name, Specification, and Additional Properties<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-2">The registrations need to define
+* Protocol: The <code>protocol</code> name, as appearing in the JSON
+* URL scheme: Which URL scheme or schemes are to used in the URL
+* Port: The default port number, if none is given in the URL
+* Name: The commonly used name of the protocol
+* Specification: Which RFCs or document specifies the protocol, and
+* Additional Properties: (Optional) Protocol-specific JSON properties and
+  their meaning.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="initial-registration">
+<section id="section-7.3">
+        <h3 id="name-initial-registration">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-initial-registration" class="section-name selfRef">Initial registration</a>
+        </h3>
+<table class="center" id="table-2">
+          <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Protocol</th>
+              <th class="text-left" rowspan="1" colspan="1">URL scheme</th>
+              <th class="text-left" rowspan="1" colspan="1">Port</th>
+              <th class="text-left" rowspan="1" colspan="1">Name</th>
+              <th class="text-left" rowspan="1" colspan="1">Specification</th>
+              <th class="text-left" rowspan="1" colspan="1"> </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-------------</td>
+              <td class="text-left" rowspan="1" colspan="1">-----------</td>
+              <td class="text-left" rowspan="1" colspan="1">----</td>
+              <td class="text-left" rowspan="1" colspan="1">------------</td>
+              <td class="text-left" rowspan="1" colspan="1">----------------------------------</td>
+              <td class="text-left" rowspan="1" colspan="1">Additional Properties</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>jmap</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">https</td>
+              <td class="text-left" rowspan="1" colspan="1">443</td>
+              <td class="text-left" rowspan="1" colspan="1">JMAP</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC 8620, RFC 8621, RFC 8887, RFC 9610 et al</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>imap</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">imaps</td>
+              <td class="text-left" rowspan="1" colspan="1">993</td>
+              <td class="text-left" rowspan="1" colspan="1">IMAP</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC 9051 or RFC 3501, et al</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>pop3</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">pop3s</td>
+              <td class="text-left" rowspan="1" colspan="1">995</td>
+              <td class="text-left" rowspan="1" colspan="1">POP3</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC 1939, RFC 5034</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>smtp</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">submissions</td>
+              <td class="text-left" rowspan="1" colspan="1">465</td>
+              <td class="text-left" rowspan="1" colspan="1">SMTP</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC 5321, RFC 2822</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>caldav</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">https</td>
+              <td class="text-left" rowspan="1" colspan="1">443</td>
+              <td class="text-left" rowspan="1" colspan="1">CalDAV</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC 4791</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>carddav</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">https</td>
+              <td class="text-left" rowspan="1" colspan="1">443</td>
+              <td class="text-left" rowspan="1" colspan="1">CardDav</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC 6352</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>webdav</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">https</td>
+              <td class="text-left" rowspan="1" colspan="1">443</td>
+              <td class="text-left" rowspan="1" colspan="1">WebDAV</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC 4918</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>managesieve</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">sieves</td>
+              <td class="text-left" rowspan="1" colspan="1">443</td>
+              <td class="text-left" rowspan="1" colspan="1">ManageSieve</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC 5804, RFC 5228</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>ews</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">https</td>
+              <td class="text-left" rowspan="1" colspan="1">443</td>
+              <td class="text-left" rowspan="1" colspan="1">Exchange Web Services</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>activeSync</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">https</td>
+              <td class="text-left" rowspan="1" colspan="1">443</td>
+              <td class="text-left" rowspan="1" colspan="1">ActiveSync</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>graph</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">https</td>
+              <td class="text-left" rowspan="1" colspan="1">443</td>
+              <td class="text-left" rowspan="1" colspan="1">Microsoft Graph</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-7.3-2">The Additional Properties field is empty in all of the initial values.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="addition-of-dns-srv-service-names-pacc-and-paccmx">
+<section id="section-7.4">
+        <h3 id="name-addition-of-dns-srv-service">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-addition-of-dns-srv-service" class="section-name selfRef">Addition of DNS SRV Service Names pacc and pacc_mx</a>
+        </h3>
+<div id="new-records-to-be-registered">
+<section id="section-7.4.1">
+          <h4 id="name-new-records-to-be-registere">
+<a href="#section-7.4.1" class="section-number selfRef">7.4.1. </a><a href="#name-new-records-to-be-registere" class="section-name selfRef">New records to be registered</a>
+          </h4>
+<table class="center" id="table-3">
+            <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Service Name</th>
+                <th class="text-left" rowspan="1" colspan="1">Transport Protocol</th>
+                <th class="text-left" rowspan="1" colspan="1">References</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>pacc</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>https</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">[PACC] This document</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>paccmx</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>https</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">[PACC] This document</td>
+              </tr>
+            </tbody>
+          </table>
+</section>
+</div>
+<div id="registration-of-srv-service-name-pacc">
+<section id="section-7.4.2">
+          <h4 id="name-registration-of-srv-service">
+<a href="#section-7.4.2" class="section-number selfRef">7.4.2. </a><a href="#name-registration-of-srv-service" class="section-name selfRef">Registration of SRV Service Name pacc</a>
+          </h4>
+<p id="section-7.4.2-1">In the "Service Name and Transport Protocol Port Number" registry:<a href="#section-7.4.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.4.2-2.1">
+              <p id="section-7.4.2-2.1.1">Service Name: <code>pacc</code><a href="#section-7.4.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.2-2.2">
+              <p id="section-7.4.2-2.2.1">Transport Protocol(s): <code>https</code><a href="#section-7.4.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.2-2.3">
+              <p id="section-7.4.2-2.3.1">Assignee: Ben Bucksch<a href="#section-7.4.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.2-2.4">
+              <p id="section-7.4.2-2.4.1">Contact: ben.bucksch@beonex.com<a href="#section-7.4.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.2-2.5">
+              <p id="section-7.4.2-2.5.1">Description: PACC - Automatic configuration of mail servers<a href="#section-7.4.2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.2-2.6">
+              <p id="section-7.4.2-2.6.1">Reference: [PACC] This document<a href="#section-7.4.2-2.6.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.2-2.7">
+              <p id="section-7.4.2-2.7.1">Port Number: -<a href="#section-7.4.2-2.7.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.2-2.8">
+              <p id="section-7.4.2-2.8.1">Service Code: -<a href="#section-7.4.2-2.8.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.2-2.9">
+              <p id="section-7.4.2-2.9.1">Known Unauthorized Uses: -<a href="#section-7.4.2-2.9.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.2-2.10">
+              <p id="section-7.4.2-2.10.1">Assignment Notes: -<a href="#section-7.4.2-2.10.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+<div id="registration-of-srv-service-name-paccmx">
+<section id="section-7.4.3">
+          <h4 id="name-registration-of-srv-service-">
+<a href="#section-7.4.3" class="section-number selfRef">7.4.3. </a><a href="#name-registration-of-srv-service-" class="section-name selfRef">Registration of SRV Service Name paccmx</a>
+          </h4>
+<p id="section-7.4.3-1">In the "Service Name and Transport Protocol Port Number" registry:<a href="#section-7.4.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.4.3-2.1">
+              <p id="section-7.4.3-2.1.1">Service Name: <code>paccmx</code><a href="#section-7.4.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.3-2.2">
+              <p id="section-7.4.3-2.2.1">Transport Protocol(s): <code>https</code><a href="#section-7.4.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.3-2.3">
+              <p id="section-7.4.3-2.3.1">Assignee: Ben Bucksch<a href="#section-7.4.3-2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.3-2.4">
+              <p id="section-7.4.3-2.4.1">Contact: ben.bucksch@beonex.com<a href="#section-7.4.3-2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.3-2.5">
+              <p id="section-7.4.3-2.5.1">Description: PACC - Automatic configuration of mail servers via MX<a href="#section-7.4.3-2.5.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.3-2.6">
+              <p id="section-7.4.3-2.6.1">Reference: [PACC] This document<a href="#section-7.4.3-2.6.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.3-2.7">
+              <p id="section-7.4.3-2.7.1">Port Number: -<a href="#section-7.4.3-2.7.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.3-2.8">
+              <p id="section-7.4.3-2.8.1">Service Code: -<a href="#section-7.4.3-2.8.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.3-2.9">
+              <p id="section-7.4.3-2.9.1">Known Unauthorized Uses: -<a href="#section-7.4.3-2.9.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.3-2.10">
+              <p id="section-7.4.3-2.10.1">Assignment Notes: -<a href="#section-7.4.3-2.10.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+<div id="use-of-https-as-protocol">
+<section id="section-7.4.4">
+          <h4 id="name-use-of-_https-as-protocol">
+<a href="#section-7.4.4" class="section-number selfRef">7.4.4. </a><a href="#name-use-of-_https-as-protocol" class="section-name selfRef">Use of _https as protocol</a>
+          </h4>
+<p id="section-7.4.4-1">While <code>tcp</code> is typically used for proto, <code>https</code> is also valid and is more
+precise in this case.<a href="#section-7.4.4-1" class="pilcrow">¶</a></p>
+<p id="section-7.4.4-2"><code>https</code> is already defined as service, and therefore may also be used as
+Transport Protocol, per the definition of RFC 2782: "Proto ...
+any name defined by Assigned Numbers or locally may be used (as for Service)".<a href="#section-7.4.4-2" class="pilcrow">¶</a></p>
+<p id="section-7.4.4-3">In case <code>https</code> cannot be used as transport protocol, <code>tcp</code> will be registered
+instead.<a href="#section-7.4.4-3" class="pilcrow">¶</a></p>
+<p id="section-7.4.4-4">References:
+* RFC 2782 Section "The format of the SRV RR"
+* RFC 6335 Section 5.2
+* <a href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbe1rs.xhtml">https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbe1rs.xhtml</a><a href="#section-7.4.4-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="conventions-and-definitions">
+<section id="section-8">
+      <h2 id="name-conventions-and-definitions">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      </h2>
+<p id="section-8-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-8-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-normative-references">
+<section id="section-9">
+      <h2 id="name-normative-references">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+      </h2>
+<dl class="references">
+<dt id="RFC2119">[RFC2119]</dt>
+      <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+    <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-A">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Ben Bucksch</span></div>
+<div dir="auto" class="left"><span class="org">Beonex</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:ben.bucksch@beonex.com" class="email">ben.bucksch@beonex.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
