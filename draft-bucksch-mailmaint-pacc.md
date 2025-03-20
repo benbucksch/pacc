@@ -183,8 +183,8 @@ The `protocol` is the key of the pbject map inside the `servers` property.
 
 It specifies which wire protocol to use for this server.
 
-| Protocol      | URL scheme  | Port | Name         | Specification
-| ------------- | ----------- | ---- | ------------ | ---------------------------------- | Additional Properties
+| Protocol      | URL scheme  | Port | Name         | Specification | Additional Properties
+| ------------- | ----------- | ---- | ------------ | ------------- | ---
 | `jmap`        | https       | 443  | JMAP         | RFC 8620, RFC 8621, RFC 8887, RFC 9610 et al |
 | `imap`        | imaps       | 993  | IMAP         | RFC 9051 or RFC 3501, et al |
 | `pop3`        | pop3s       | 995  | POP3         | RFC 1939, RFC 5034 |
@@ -197,8 +197,9 @@ It specifies which wire protocol to use for this server.
 | `activeSync`  | https       | 443  | ActiveSync            | |
 | `graph`       | https       | 443  | Microsoft Graph       | |
 
-Other protocol names can be added using an IANA registry. Their 
-respective registrations need to define
+
+Other protocol names can be added using an IANA registry. Their
+respective registrations need to define:
 * Protocol: The `protocol` name, as appearing in the JSON
 * URL scheme: Which URL scheme or schemes are to used in the URL
 * Port: The default port number, if none is given in the URL
@@ -274,19 +275,19 @@ sections.
 
 #### Authentication verification and fallback
 
-The client SHOULD test the configuration during setup, with an actual 
+The client SHOULD test the configuration during setup, with an actual
 authentication attempt.
 
-If the authentication fails, the client decides based on the 
+If the authentication fails, the client decides based on the
 authentication error code how to proceed. E.g. if the authentiocation
-method itself failed, or the error code indicates a systemic failure, 
+method itself failed, or the error code indicates a systemic failure,
 the client SHOULD use another authentication method from the list.
 
-If the authentication method is working, but the error code indicated 
+If the authentication method is working, but the error code indicated
 that the username or password was wrong, then the client MAY ask the
-user to correct the password. 
+user to correct the password.
 
-For that reason, the server SHOULD be specific in the error codes and 
+For that reason, the server SHOULD be specific in the error codes and
 allow the client to distinguish between
 * an unsupported or non-working authentication method or other
   systemic failures
@@ -300,8 +301,8 @@ client might tell the user that the password is wrong, and the user starts
 attempting other passwords, potentially revealing passwords to other
 higher-value assets, which is highly dangerous.
 
-If the authentification succeeded, the client SHOULD take note of the 
-working configutation and use that for all subsequent connections, 
+If the authentification succeeded, the client SHOULD take note of the
+working configutation and use that for all subsequent connections,
 until an explicit reconfiguration occurs. During normal everyday operation,
 the client SHOULD NOT fallback nor attempt multiple different authentication
 methods.
@@ -322,20 +323,20 @@ and the server will ensure that this works.
 
 While PACC supports only a single server per protocol, it MAY give the client
 the choice of different protocols. Not all clients might implement all
-protocols. That's why the PACC file SHOULD contain all protocols that the 
+protocols. That's why the PACC file SHOULD contain all protocols that the
 provider offers to its users.
 
 The client chooses which protocol to use, based on
 * which protocols the client implements,
-* the configuration, e.g. the config specifies only an OAuth2 
+* the configuration, e.g. the config specifies only an OAuth2
   authentication and the client either doesn't implement OAuth2, or
   it doesn't have a client ID for this provider,
 * client policy, e.g. the client preferring JMAP over IMAP.
 
-Server protocols, and properties that the client does not support 
-MUST be ignored and the client MUST continue to parse the other 
+Server protocols, and properties that the client does not support
+MUST be ignored and the client MUST continue to parse the other
 server sections, which may contain configs that the client
-understands and supports. The client ignores the file only if there 
+understands and supports. The client ignores the file only if there
 is no supported and working config found.
 
 ### TLS validation
@@ -345,8 +346,8 @@ the client MUST validate the TLS certificate and ensure that the
 certificate is valid for the hostname given in this config. If not,
 or if the TLS certificate is otherwise invalid, the client MUST
 either disconnect or MAY warn the user of the
-dangers and ask for user confirmation. Such warning and confirmation 
-MAY only be allowed at original configuration and MUST NOT be allowed 
+dangers and ask for user confirmation. Such warning and confirmation
+MAY only be allowed at original configuration and MUST NOT be allowed
 during normal everyday connection.
 
 If the server had a valid TLS certificate during original configuration
@@ -370,10 +371,10 @@ E.g.
     shortName: "ACME",
 
 The `name` property contains the name of the provider, e.g.
-as preferred by the marketing of the provider itself. It SHOULD be no 
+as preferred by the marketing of the provider itself. It SHOULD be no
 longer than 30 characters, but MUST be no longer than 60 characters.
 
-The `shortName` property contains the name of the provider, as 
+The `shortName` property contains the name of the provider, as
 typically used by end users. It SHOULD be no longer than 12
 characters, and it MUST NOT be longer than 20 characters.
 
@@ -405,7 +406,7 @@ All of the information is optional. A contact SHOULD be included.
 
 E.g. `documentation: "https://help.example.net/howto/set-up-your-mail-app.html"`
 
-Records the user help webpage at the provider that describes the mail 
+Records the user help webpage at the provider that describes the mail
 server settings.
 
 The config in the PACC file does not necessarily have to match the config
@@ -448,15 +449,15 @@ The client MUST NOT reject a config file solely based on the version number.
 
 The client SHOULD validate that the config file is valid JSON as per RFC 8259,
 and if the JSON syntax is invalid, the client SHOULD ignore the entire file.
-In contrast, if there are syntactically valid, but unknown JSON 
+In contrast, if there are syntactically valid, but unknown JSON
 properties, the client MUST NOT ignore the file.
 
 The client SHOULD take only the properties that are
 supported by the client, and MUST ignore the others that are unknown
 to the client.
 
-The client may optionally want to validate the XML before parsing it. 
-This is not required. If the client choses to validate, the validation 
+The client may optionally want to validate the XML before parsing it.
+This is not required. If the client choses to validate, the validation
 MUST ignore unknown properties and MUST NOT drop or ignore a configuration
 that contains unknown properties. This is needed to allow future extensions
 of the format without breaking existing clients.
@@ -618,7 +619,7 @@ require authentication, but MUST be public.
 
 This is because the config contains the authentication method.
 Without knowing the config, the client does not know which
-authentication method to use. Given that the config is required for 
+authentication method to use. Given that the config is required for
 authentication, the config itself cannot require authentication.
 
 
@@ -789,7 +790,7 @@ secure server with all unnecessary services and server features turned off.
 
 ## Registration
 
-IANA will create the following registry in a new registry group called 
+IANA will create the following registry in a new registry group called
 "PACC":
 
 Registry Name: "PACC Protocol Type Names"
@@ -873,7 +874,7 @@ In the "Service Name and Transport Protocol Port Number" registry:
 While `tcp` is typically used for proto, `https` is also valid and is more
 precise in this case.
 
-`https` is already defined as service, and therefore may also be used as 
+`https` is already defined as service, and therefore may also be used as
 Transport Protocol, per the definition of RFC 2782: "Proto ...
 any name defined by Assigned Numbers or locally may be used (as for Service)".
 
