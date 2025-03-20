@@ -566,10 +566,10 @@ e.g.
 
 ### DNS MX response
 
-The DNS server returns the DNS MX records with the hostnames of the MX servers
+The DNS server returns the DNS MX records with the hostnames of the SMTP servers
 that accept email for the user's email address:
 
-    example.com   MX   %PRIORITY% %MXSERVER1%.
+    example.com   MX   %PRIORITY% %MXSERVER%.
 
 e.g.
 
@@ -578,8 +578,9 @@ e.g.
     example.com   MX   30 beetruche3.mx.example.net.
 
 The client takes only the highest priority result, i.e. the one with the
-lowest priority number (in this example 10). If there are multiple responses
-with the same lowest priority number, the client takes only the first of them.
+lowest priority number (in this example 10), given that the priority numbers
+are in reverse order. If there are multiple responses
+with the same lowest priority number, the client takes only the first one.
 The client takes the hostname of this MX server as result `%MXSERVER%`.
 
 ### DNS SRV query
@@ -636,10 +637,10 @@ In this example, example.com hosts its email with hoster example.net:
 Any of the above URLs for retrieving the config file MUST NOT
 require authentication, but MUST be public.
 
-This is because the config contains the authentication method.
-Without knowing the config, the client does not know which
-authentication method to use. Given that the config is required for
-authentication, the config itself cannot require authentication.
+This is because the configuration information in the PACC file includes the
+authentication method. Without the PACC file, the client does not know which
+authentication method to use. Given that this information is required for
+authentication, the PACC config file itself cannot require authentication.
 
 
 # Config validation
@@ -652,8 +653,8 @@ let him confirm it. While doing so:
 
 * At least the second-level domain name(s) of the hostnames involved MUST be
   shown clearly and with high prominence.
-* The client MUST NOT cut off parts of long second-level domains, to avoid
-  spoofing. At least 63 characters MUST be displayed.
+* To avoid spoofing, the client MUST NOT cut off parts of long
+  second-level domains. At least 63 characters MUST be displayed.
 
 ## Login test
 
