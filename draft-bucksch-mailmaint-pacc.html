@@ -2157,11 +2157,11 @@ DNS MX example.com.
           <h4 id="name-dns-mx-response">
 <a href="#section-3.2.2" class="section-number selfRef">3.2.2. </a><a href="#name-dns-mx-response" class="section-name selfRef">DNS MX response</a>
           </h4>
-<p id="section-3.2.2-1">The DNS server returns the DNS MX records with the hostnames of the MX servers
+<p id="section-3.2.2-1">The DNS server returns the DNS MX records with the hostnames of the SMTP servers
 that accept email for the user's email address:<a href="#section-3.2.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-3.2.2-2">
 <pre>
-example.com   MX   %PRIORITY% %MXSERVER1%.
+example.com   MX   %PRIORITY% %MXSERVER%.
 </pre><a href="#section-3.2.2-2" class="pilcrow">¶</a>
 </div>
 <p id="section-3.2.2-3">e.g.<a href="#section-3.2.2-3" class="pilcrow">¶</a></p>
@@ -2173,8 +2173,9 @@ example.com   MX   30 beetruche3.mx.example.net.
 </pre><a href="#section-3.2.2-4" class="pilcrow">¶</a>
 </div>
 <p id="section-3.2.2-5">The client takes only the highest priority result, i.e. the one with the
-lowest priority number (in this example 10). If there are multiple responses
-with the same lowest priority number, the client takes only the first of them.
+lowest priority number (in this example 10), given that the priority numbers
+are in reverse order. If there are multiple responses
+with the same lowest priority number, the client takes only the first one.
 The client takes the hostname of this MX server as result <code>%MXSERVER%</code>.<a href="#section-3.2.2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2265,10 +2266,10 @@ pacc                           A     192.0.1.9
         </h3>
 <p id="section-3.5-1">Any of the above URLs for retrieving the config file <span class="bcp14">MUST NOT</span>
 require authentication, but <span class="bcp14">MUST</span> be public.<a href="#section-3.5-1" class="pilcrow">¶</a></p>
-<p id="section-3.5-2">This is because the config contains the authentication method.
-Without knowing the config, the client does not know which
-authentication method to use. Given that the config is required for
-authentication, the config itself cannot require authentication.<a href="#section-3.5-2" class="pilcrow">¶</a></p>
+<p id="section-3.5-2">This is because the configuration information in the PACC file includes the
+authentication method. Without the PACC file, the client does not know which
+authentication method to use. Given that this information is required for
+authentication, the PACC config file itself cannot require authentication.<a href="#section-3.5-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2292,8 +2293,8 @@ let him confirm it. While doing so:<a href="#section-4.1-1" class="pilcrow">¶</
 shown clearly and with high prominence.<a href="#section-4.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.1-2.2">
-            <p id="section-4.1-2.2.1">The client <span class="bcp14">MUST NOT</span> cut off parts of long second-level domains, to avoid
-spoofing. At least 63 characters <span class="bcp14">MUST</span> be displayed.<a href="#section-4.1-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-2.2.1">To avoid spoofing, the client <span class="bcp14">MUST NOT</span> cut off parts of long
+second-level domains. At least 63 characters <span class="bcp14">MUST</span> be displayed.<a href="#section-4.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
