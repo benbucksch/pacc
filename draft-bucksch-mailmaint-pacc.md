@@ -3,7 +3,7 @@ title: "PACC - Automatic configuration for mail servers, calendar and contacts s
 abbrev: "PACC"
 category: info
 
-docname: draft-bucksch-pacc-latest
+docname: draft-bucksch-mailmaint-pacc-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
@@ -29,7 +29,7 @@ venue:
   mail: mailmaint@ietf.org
   arch: https://mailarchive.ietf.org/arch/browse/mailmaint/
   github: "benbucksch/pacc"
-  latest: "https://benbucksch.github.io/pacc/draft-bucksch-pacc.html"
+  latest: "https://benbucksch.github.io/pacc/draft-bucksch-mailmaint-pacc.html"
 
 author:
  -
