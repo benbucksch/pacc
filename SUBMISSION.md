@@ -1,6 +1,6 @@
 1. git push
 2. Check https://github.com/benbucksch/pacc/actions
-3. Check https://benbucksch.github.io/pacc/draft-bucksch-mailmaint-pacc.html
+3. Check https://benbucksch.github.io/pacc/draft-ietf-mailmaint-pacc.html
 4. Go to https://author-tools.ietf.org/
 5. Upload the `draft-bucksch-pacc.md` file from git repo
 6. Click [XML], then [Download], and save it as
