@@ -4,13 +4,13 @@
 
 mailmaint                                                     B. Bucksch
 Internet-Draft                                                    Beonex
-Intended status: Informational                             20 March 2025
-Expires: 21 September 2025
+Intended status: Informational                              21 July 2025
+Expires: 22 January 2026
 
 
  PACC - Automatic configuration for mail servers, calendar and contacts
                                   sync
-                  draft-bucksch-mailmaint-pacc-latest
+                    draft-ietf-mailmaint-pacc-latest
 
 Abstract
 
@@ -24,9 +24,9 @@ About This Document
    This note is to be removed before publishing as an RFC.
 
    The latest revision of this draft can be found at
-   https://benbucksch.github.io/pacc/draft-bucksch-mailmaint-pacc.html.
+   https://benbucksch.github.io/pacc/draft-ietf-mailmaint-pacc.html.
    Status information for this document may be found at
-   https://datatracker.ietf.org/doc/draft-bucksch-mailmaint-pacc/.
+   https://datatracker.ietf.org/doc/draft-ietf-mailmaint-pacc/.
 
    Discussion of this document takes place on the mailmaint Working
    Group mailing list (mailto:mailmaint@ietf.org), which is archived at
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 September 2025.
+   This Internet-Draft will expire on 22 January 2026.
 
 Copyright Notice
 
