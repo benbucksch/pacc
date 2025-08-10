@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-07T00:29:02.284805+00:00",
+  "timestamp": "2025-08-10T00:30:59.846566+00:00",
   "repo": "benbucksch/pacc",
   "labels": [
     {
@@ -49,6 +49,71 @@
       "color": "ffffff"
     }
   ],
-  "issues": [],
+  "issues": [
+    {
+      "number": 1,
+      "id": "I_kwDOOLZsjs7E7yEG",
+      "title": "Please clarify the \"native\" authentication method",
+      "url": "https://github.com/benbucksch/pacc/issues/1",
+      "state": "OPEN",
+      "author": "mimi89999",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Hello,\n\nI noticed that the example JSON config file contains the `native` value in the `authentication` section. The meaning of that value however is not explained anywhere in the spec.",
+      "createdAt": "2025-08-08T13:09:48Z",
+      "updatedAt": "2025-08-08T13:09:48Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 2,
+      "id": "I_kwDOOLZsjs7E8VXJ",
+      "title": "Handling of multiple SRV records",
+      "url": "https://github.com/benbucksch/pacc/issues/2",
+      "state": "OPEN",
+      "author": "mimi89999",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Hello,\n\nThe spec states that:\n> The DNS server returns a DNS SRV record with the hostname of the HTTPS server where the PACC config file can be found:\n\nHowever, it doesn't specify how the client should behave when multiple SRV records are returned. Should such a configuration be considered invalid? Can it use any value? Should it try all?",
+      "createdAt": "2025-08-08T13:54:00Z",
+      "updatedAt": "2025-08-08T13:54:00Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 3,
+      "id": "I_kwDOOLZsjs7E8pd-",
+      "title": "SRV record from MX mentions EMAILDOMAIN",
+      "url": "https://github.com/benbucksch/pacc/issues/3",
+      "state": "OPEN",
+      "author": "mimi89999",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Hello,\n\nThe section `3.2.3. DNS SRV query` mentions: `DNS SRV _paccmx._https.%EMAILDOMAIN%.`\n\nI believe that there should be `%MXSERVER%` instead.",
+      "createdAt": "2025-08-08T14:16:09Z",
+      "updatedAt": "2025-08-08T14:16:09Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 4,
+      "id": "I_kwDOOLZsjs7FAvP_",
+      "title": "Consider adding a section on https certificate validation",
+      "url": "https://github.com/benbucksch/pacc/issues/4",
+      "state": "OPEN",
+      "author": "mimi89999",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Hello,\n\nI noticed that the spec has a section on TLS certificate validation for the mail servers, but doesn't mention it for PACC retrieval. It's kind of obvious that the certificate must be validated, but I think that it might still make sense to mention it.",
+      "createdAt": "2025-08-08T21:56:40Z",
+      "updatedAt": "2025-08-08T21:56:40Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
   "pulls": []
 }
