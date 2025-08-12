@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-10T00:30:59.846566+00:00",
+  "timestamp": "2025-08-12T00:26:35.176212+00:00",
   "repo": "benbucksch/pacc",
   "labels": [
     {
@@ -111,6 +111,22 @@
       "body": "Hello,\n\nI noticed that the spec has a section on TLS certificate validation for the mail servers, but doesn't mention it for PACC retrieval. It's kind of obvious that the certificate must be validated, but I think that it might still make sense to mention it.",
       "createdAt": "2025-08-08T21:56:40Z",
       "updatedAt": "2025-08-08T21:56:40Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 5,
+      "id": "I_kwDOOLZsjs7FJR8e",
+      "title": "Please add rationale for allowing users to accept invalid certificates",
+      "url": "https://github.com/benbucksch/pacc/issues/5",
+      "state": "OPEN",
+      "author": "mimi89999",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The spec states that:\n\n> If not, or if the TLS certificate is otherwise invalid, the client MUST either disconnect or MAY warn the user of the dangers and ask for user confirmation.\n\nI think that an additional explanation of the reason for allowing the user to accept invalid certificates would be very useful. Do you want to support misconfigured servers? Abandoned servers with expired certificates? Servers that use self signed certificates or certificates signed by a corporate CA? In the latter case, it would be better to allow specifying the certificate hash in the PACC config instead of having the user manually verify the certificate hash.\n\nIf the spec does allow the user to accept an invalid certificate, there should be a parameter in the PACC file that does forbid that. Something like HSTS in HTTP.",
+      "createdAt": "2025-08-10T12:50:19Z",
+      "updatedAt": "2025-08-10T12:50:19Z",
       "closedAt": null,
       "comments": []
     }
