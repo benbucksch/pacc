@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-12T00:26:35.176212+00:00",
+  "timestamp": "2025-08-14T00:26:54.821845+00:00",
   "repo": "benbucksch/pacc",
   "labels": [
     {
@@ -127,6 +127,22 @@
       "body": "The spec states that:\n\n> If not, or if the TLS certificate is otherwise invalid, the client MUST either disconnect or MAY warn the user of the dangers and ask for user confirmation.\n\nI think that an additional explanation of the reason for allowing the user to accept invalid certificates would be very useful. Do you want to support misconfigured servers? Abandoned servers with expired certificates? Servers that use self signed certificates or certificates signed by a corporate CA? In the latter case, it would be better to allow specifying the certificate hash in the PACC config instead of having the user manually verify the certificate hash.\n\nIf the spec does allow the user to accept an invalid certificate, there should be a parameter in the PACC file that does forbid that. Something like HSTS in HTTP.",
       "createdAt": "2025-08-10T12:50:19Z",
       "updatedAt": "2025-08-10T12:50:19Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 6,
+      "id": "I_kwDOOLZsjs7Fgbxx",
+      "title": "Doubts about relying on user verification",
+      "url": "https://github.com/benbucksch/pacc/issues/6",
+      "state": "OPEN",
+      "author": "mimi89999",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The spec states that:\n> Nonetheless, the result should be used with care. If such configs are used, the end user MUST explicitly confirm the config, particularly the resulting second-level domains. See section \"User approval\".\n\nI doubt that it makes much sense to rely on user verification. This assumes that the user knows where a company mail is hosted and knows the exact domains or can easily find that information. That basically defies the whole point of having a mechanism like PACC or autoconfig. I also think that having users configuring their email clients over an untrusted connection isn't that rare. People might attempt to configure an email client on a mobile device when going for a trip or on holidays. If they end up doing it abroad, they will most likely be using a public WiFi network for that.",
+      "createdAt": "2025-08-12T10:31:55Z",
+      "updatedAt": "2025-08-12T10:31:55Z",
       "closedAt": null,
       "comments": []
     }
